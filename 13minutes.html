@@ -404,12 +404,15 @@ body::before {
   background:rgba(255,255,255,0.1);
   border:1px solid rgba(255,255,255,0.2);
   color:var(--paper);
-  font-size:1rem;
-  width:28px;
+  font-size:0.7rem;
+  font-family:'Oswald',sans-serif;
+  letter-spacing:0.05em;
+  padding:0 0.5rem;
   height:28px;
   cursor:pointer;
   display:flex;align-items:center;justify-content:center;
   transition:background 0.15s;
+  white-space:nowrap;
 }
 .bid-btn:hover { background:rgba(255,255,255,0.2); }
 
@@ -645,6 +648,17 @@ body::before {
   background:rgba(0,0,0,0.12);
   border-top:1px solid rgba(0,0,0,0.1);
   margin-top:auto;
+}
+
+/* Cubes on facedown Cuba card — overlay at bottom since there's no flex column */
+.bg-card-facedown + .bg-cubes {
+  position:absolute;
+  bottom:0;
+  left:0;
+  right:0;
+  margin-top:0;
+  border-top:none;
+  background:rgba(0,0,0,0.45);
 }
 
 /* FACEDOWN CUBA CARD */
@@ -1295,9 +1309,9 @@ body::before {
           <div class="initiative-section">
             <div class="init-label">Bid Influence Cubes</div>
             <div class="bid-controls">
-              <button class="bid-btn" onclick="adjustBid(-1)">−</button>
+              <button class="bid-btn" onclick="adjustBid(-1)">− LESS</button>
               <input type="number" class="bid-number" id="bid-input" value="0" min="0" max="13" readonly>
-              <button class="bid-btn" onclick="adjustBid(1)">+</button>
+              <button class="bid-btn" onclick="adjustBid(1)">MORE +</button>
             </div>
             <button class="confirm-bid-btn" id="confirm-bid-btn" onclick="confirmBid()">CONFIRM BID</button>
           </div>
@@ -1309,9 +1323,9 @@ body::before {
             <div class="cube-placement" id="cube-placement-area">
               <div class="cube-placement-label" id="placement-label">Cubes to place</div>
               <div class="cube-spinner">
-                <button class="bid-btn" onclick="adjustCubes(-1)">−</button>
+                <button class="bid-btn" onclick="adjustCubes(-1)">− FEWER</button>
                 <span class="cube-count" id="cube-count-display">1</span>
-                <button class="bid-btn" onclick="adjustCubes(1)">+</button>
+                <button class="bid-btn" onclick="adjustCubes(1)">MORE +</button>
               </div>
               <div style="font-size:0.65rem;color:rgba(255,255,255,0.4);margin-bottom:0.4rem;">
                 Then click a battleground to place.
@@ -1693,6 +1707,8 @@ function renderBattlegrounds() {
     }
 
     if(bg.faceDown){
+      const cubesUS=bg.cubesUS||0, cubesUSSR=bg.cubesUSSR||0;
+      const cubeHTML=Array(cubesUS).fill('<div class="cube us"></div>').join('')+Array(cubesUSSR).fill('<div class="cube ussr"></div>').join('');
       div.innerHTML=`<div class="bg-card-facedown">
         <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 248 347" preserveAspectRatio="xMidYMid slice">
           <defs><linearGradient id="cbg"><stop offset="0" stop-color="#cacaca"/><stop offset="1" stop-color="#9d9d9d"/></linearGradient><linearGradient xlink:href="#cbg" id="cbg2" x1="95" x2="208" y1="-0.5" y2="350" gradientUnits="userSpaceOnUse"/></defs>
@@ -1702,12 +1718,16 @@ function renderBattlegrounds() {
           <circle cx="124" cy="276.479" r="24" fill="#fce550"/>
           <path d="M113.76 292.837v-5.673q1.815-2.11 3.494-3.88 1.702-1.792 3.154-3.358 1.475-1.566 2.677-2.972 1.203-1.43 2.065-2.814 1.792-2.904 1.792-5.922 0-3.381-1.61-5.06-.523-.544-1.203-.816v-2.452q4.787.092 7.67 2.632 2.88 2.519 2.88 6.558 0 3.721-4.151 8.01-1.816 1.883-5.332 5.105-3.495 3.2-5.809 5.468h2.45v5.174Zm10.165-5.174h2.269q3.993 0 5.24-2.405.341-.658.614-1.316.68-1.724 1.384-2.224h.885v11.119h-10.392Zm-1.815-25.571q-2.678.204-3.767 1.906-.318.499-.386 1.043 1.884.114 2.837 1.452.748 1.044.748 2.133 0 1.067-.249 1.702-.25.635-.726 1.112-.953.998-2.27.998-1.292 0-2.04-.34-.75-.34-1.272-.953-1.066-1.226-1.066-2.972 0-1.748.567-3.087.59-1.36 1.656-2.428 2.27-2.268 5.968-2.768Z" font-family="'Stardos Stencil'" font-size="56" font-weight="700" text-anchor="middle"/>
         </svg>
-      </div>`;
+      </div>
+      ${cubeHTML?`<div class="bg-cubes">${cubeHTML}</div>`:''}`;
     } else {
       const cd=cardData(bg.cardId);
       if(!cd){el.appendChild(div);return;}
       const bannerCls=cd.side==='US'?'us':cd.side==='USSR'?'ussr':'neutral';
       const cubesUS=bg.cubesUS||0, cubesUSSR=bg.cubesUSSR||0;
+      const cubeStrip=(cubesUS+cubesUSSR)>0
+        ? `<div class="bg-cubes">${Array(cubesUS).fill('<div class="cube us"></div>').join('')}${Array(cubesUSSR).fill('<div class="cube ussr"></div>').join('')}</div>`
+        : '';
       div.innerHTML=`
         <div class="bg-card-inner">
           <div class="bg-card-paper">
@@ -1722,10 +1742,7 @@ function renderBattlegrounds() {
                 <span style="font-size:2rem;opacity:0.35;">${cd.side==='US'?'🦅':cd.side==='USSR'?'☭':'🕊'}</span>
               </div>
               <div class="bg-card-event">${cd.eventDesc.substring(0,90)}…</div>
-              <div class="bg-cubes">
-                ${Array(cubesUS).fill('<div class="cube us"></div>').join('')}
-                ${Array(cubesUSSR).fill('<div class="cube ussr"></div>').join('')}
-              </div>
+              ${cubeStrip}
             </div>
           </div>
         </div>`;
