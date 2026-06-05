@@ -316,10 +316,10 @@ body::before {
   position:relative;
   flex-shrink:0;
 }
-/* Cubes sitting on battleground cards are smaller so they fit cleanly */
+/* Cubes sitting on battleground cards */
 .bg-cubes .cube {
-  width:11px;
-  height:11px;
+  width:13px;
+  height:13px;
 }
 .cube::after {
   content:'';
@@ -634,21 +634,17 @@ body::before {
   font-family:'IM Fell English',serif;
 }
 
-/* CUBES ON BATTLEGROUND — sits inside card at bottom, clipped by overflow:hidden on .battleground */
+/* CUBES ON BATTLEGROUND — in-flow section at the bottom of the card content */
 .bg-cubes {
-  position:absolute;
-  bottom:0;
-  left:0;
-  right:0;
   display:flex;
   justify-content:center;
-  align-items:flex-end;
-  gap:3px;
   flex-wrap:wrap;
+  gap:3px;
   padding:3px 4px 4px;
-  z-index:5;
-  min-height:22px;
-  background: linear-gradient(transparent, rgba(0,0,0,0.18));
+  min-height:18px;
+  background:rgba(0,0,0,0.12);
+  border-top:1px solid rgba(0,0,0,0.1);
+  margin-top:auto;
 }
 
 /* FACEDOWN CUBA CARD */
@@ -1726,12 +1722,12 @@ function renderBattlegrounds() {
                 <span style="font-size:2rem;opacity:0.35;">${cd.side==='US'?'🦅':cd.side==='USSR'?'☭':'🕊'}</span>
               </div>
               <div class="bg-card-event">${cd.eventDesc.substring(0,90)}…</div>
+              <div class="bg-cubes">
+                ${Array(cubesUS).fill('<div class="cube us"></div>').join('')}
+                ${Array(cubesUSSR).fill('<div class="cube ussr"></div>').join('')}
+              </div>
             </div>
           </div>
-        </div>
-        <div class="bg-cubes">
-          ${Array(cubesUS).fill('<div class="cube us"></div>').join('')}
-          ${Array(cubesUSSR).fill('<div class="cube ussr"></div>').join('')}
         </div>`;
     }
     el.appendChild(div);
@@ -2045,6 +2041,16 @@ function completePendingCpuCommand(cmd){
 }
 
 function cancelPlay(){
+  // If we were in a reaction event, treat cancel as skip — do NOT touch the CPU's card
+  if(G.pendingCpuCommand){
+    const cmd=G.pendingCpuCommand;
+    G.pendingCpuCommand=null; G.opponentReactPending=false;
+    G.selectedCardIdx=null; G.playMode=null; G.cardPlaced=false; G.placedBGIdx=null;
+    G.pendingCubes=1; G.eventStep=0; G.eventCubesHeld=0; G.eventPickedBGs=[];
+    G.currentTurn='cpu';
+    completePendingCpuCommand(cmd);
+    return;
+  }
   // If card was already placed on board, remove it and return to hand
   if(G.cardPlaced && G.placedBGIdx!==null){
     const bg=G.battlegrounds[G.placedBGIdx];
@@ -2054,16 +2060,6 @@ function cancelPlay(){
     if(G.deck.length>=0 && G.playerHand.length>2){
       G.deck.push(G.playerHand.pop());
     }
-  }
-  // If we were in a reaction event, treat cancel as skip (don't clear CPU's card)
-  if(G.pendingCpuCommand){
-    const cmd=G.pendingCpuCommand;
-    G.pendingCpuCommand=null; G.opponentReactPending=false;
-    G.selectedCardIdx=null; G.playMode=null; G.cardPlaced=false; G.placedBGIdx=null;
-    G.pendingCubes=1; G.eventStep=0; G.eventCubesHeld=0; G.eventPickedBGs=[];
-    G.currentTurn='cpu';
-    completePendingCpuCommand(cmd);
-    return;
   }
   G.selectedCardIdx=null; G.playMode=null; G.cardPlaced=false; G.placedBGIdx=null;
   G.pendingCubes=1; G.eventStep=0; G.eventCubesHeld=0; G.eventPickedBGs=[];
