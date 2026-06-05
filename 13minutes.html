@@ -1310,7 +1310,7 @@ body::before {
             <div class="init-label">Bid Influence Cubes</div>
             <div class="bid-controls">
               <button class="bid-btn" onclick="adjustBid(-1)">− LESS</button>
-              <input type="number" class="bid-number" id="bid-input" value="0" min="0" max="13" readonly>
+              <span class="bid-number" id="bid-input">0</span>
               <button class="bid-btn" onclick="adjustBid(1)">MORE +</button>
             </div>
             <button class="confirm-bid-btn" id="confirm-bid-btn" onclick="confirmBid()">CONFIRM BID</button>
@@ -1784,7 +1784,7 @@ function renderActionPanel() {
     playUI.style.display='none';
     desc.textContent='Bid Influence cubes secretly. Highest bid goes first. Both bids are permanently removed from the game.';
     const maxBid=G.playerCubes;
-    document.getElementById('bid-input').max=maxBid;
+    // max enforced in adjustBid via G.playerCubes
     return;
   }
 
@@ -1925,13 +1925,13 @@ function cpuCubesOnBG(bg){    return G.cpuSide==='US'?bg.cubesUS:bg.cubesUSSR; }
 // =====================================================================
 function adjustBid(delta){
   const inp=document.getElementById('bid-input');
-  let v=parseInt(inp.value)||0;
-  inp.value=Math.max(0,Math.min(G.playerCubes,v+delta));
+  let v=parseInt(inp.textContent)||0;
+  inp.textContent=Math.max(0,Math.min(G.playerCubes,v+delta));
 }
 
 function confirmBid(){
   if(G.phase!=='initiative') return;
-  const pBid=Math.max(0,Math.min(G.playerCubes, parseInt(document.getElementById('bid-input').value)||0));
+  const pBid=Math.max(0,Math.min(G.playerCubes, parseInt(document.getElementById('bid-input').textContent)||0));
   const cBid=Math.floor(Math.random()*Math.min(4,G.cpuCubes+1));
 
   // Remove cubes
@@ -1964,7 +1964,7 @@ function closeInitiative(){
   document.getElementById('initiative-overlay').classList.remove('open');
   G.turnsThisRound=0;
   G.selectedCardIdx=null; G.playMode=null;
-  document.getElementById('bid-input').value=0;
+  document.getElementById('bid-input').textContent=0;
   render();
   if(G.currentTurn==='cpu') setTimeout(doCpuTurn,600);
 }
