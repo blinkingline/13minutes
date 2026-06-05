@@ -1,0 +1,2617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>13 Minutes: The Cuban Missile Crisis</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Special+Elite&family=Oswald:wght@400;600;700&family=IM+Fell+English:ital@0;1&display=swap');
+
+:root {
+  --us-blue: #1a3a6b;
+  --us-red: #c0392b;
+  --ussr-red: #8b1a1a;
+  --ussr-gold: #d4a017;
+  --neutral-blue: #2c5f8a;
+  --paper: #e8dfc8;
+  --paper-dark: #c9b99a;
+  --paper-fold: #d4c5a9;
+  --ink: #1a1208;
+  --ink-faded: #3d2f1a;
+  --stamp-red: rgba(180,30,30,0.85);
+  --stamp-blue: rgba(20,60,120,0.8);
+  --bg: #1a1410;
+  --felt: #2a3d2a;
+  --card-w: 180px;
+  --card-h: 252px;
+  --radius: 6px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Special Elite', monospace;
+  background: var(--bg);
+  color: var(--paper);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* === NOISE TEXTURE OVERLAY === */
+body::before {
+  content:'';
+  position:fixed;
+  inset:0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events:none;
+  z-index:9999;
+  opacity:0.4;
+}
+
+/* === SCREENS === */
+.screen { display:none; }
+.screen.active { display:flex; flex-direction:column; align-items:center; min-height:100vh; }
+
+/* ===================== INTRO SCREEN ===================== */
+#intro-screen {
+  justify-content:center;
+  background: radial-gradient(ellipse at center, #2a1f10 0%, #0d0a06 100%);
+  padding: 2rem;
+  text-align:center;
+}
+
+.intro-header {
+  margin-bottom: 2rem;
+}
+
+.intro-header .title-line1 {
+  font-family:'Oswald',sans-serif;
+  font-size: clamp(3rem,8vw,5.5rem);
+  font-weight:700;
+  letter-spacing:0.15em;
+  color: var(--paper);
+  text-shadow: 0 0 40px rgba(220,180,80,0.3);
+  line-height:1;
+}
+
+.intro-header .title-line2 {
+  font-family:'Oswald',sans-serif;
+  font-size: clamp(0.9rem,2.5vw,1.3rem);
+  font-weight:400;
+  letter-spacing:0.4em;
+  color: var(--paper-dark);
+  margin-top:0.5rem;
+}
+
+.intro-divider {
+  width:200px;
+  height:2px;
+  background: linear-gradient(90deg, transparent, var(--ussr-gold), transparent);
+  margin: 1.5rem auto;
+}
+
+.intro-subtext {
+  font-family:'IM Fell English',serif;
+  font-style:italic;
+  color: var(--paper-dark);
+  font-size:1rem;
+  margin-bottom:2.5rem;
+  max-width:480px;
+}
+
+.side-choice {
+  display:flex;
+  gap:1.5rem;
+  margin-bottom:1.5rem;
+  flex-wrap:wrap;
+  justify-content:center;
+}
+
+.side-btn {
+  width:180px;
+  padding:1.5rem 1rem;
+  border:2px solid;
+  background:transparent;
+  cursor:pointer;
+  font-family:'Oswald',sans-serif;
+  font-size:1.1rem;
+  font-weight:600;
+  letter-spacing:0.1em;
+  transition: all 0.2s;
+  position:relative;
+  overflow:hidden;
+}
+
+.side-btn::before {
+  content:'';
+  position:absolute;
+  inset:0;
+  opacity:0;
+  transition:opacity 0.2s;
+}
+
+.side-btn:hover::before { opacity:1; }
+
+.side-btn.us {
+  border-color: var(--us-blue);
+  color: #a0c0ff;
+}
+.side-btn.us::before { background: rgba(26,58,107,0.4); }
+.side-btn.us:hover { color:#fff; border-color:#4a7fc0; }
+
+.side-btn.ussr {
+  border-color: var(--ussr-red);
+  color: #ffaaaa;
+}
+.side-btn.ussr::before { background: rgba(139,26,26,0.4); }
+.side-btn.ussr:hover { color:#fff; border-color:#d44; }
+
+.side-btn.random {
+  border-color: var(--ussr-gold);
+  color: var(--ussr-gold);
+  width:auto;
+  padding:0.8rem 2rem;
+  font-size:0.9rem;
+}
+.side-btn.random::before { background: rgba(212,160,23,0.2); }
+.side-btn.random:hover { color:#fff; }
+
+.flag-icon { font-size:2rem; display:block; margin-bottom:0.5rem; }
+
+/* ===================== GAME SCREEN ===================== */
+#game-screen {
+  background: var(--felt);
+  background-image:
+    radial-gradient(ellipse at 50% 50%, rgba(40,60,40,0.8) 0%, rgba(20,35,20,1) 100%),
+    repeating-linear-gradient(45deg, rgba(0,0,0,0.03) 0px, rgba(0,0,0,0.03) 1px, transparent 1px, transparent 8px);
+  padding:0;
+  align-items:stretch;
+}
+
+.game-layout {
+  display:grid;
+  grid-template-columns: 220px 1fr 260px;
+  grid-template-rows: 56px 1fr auto;
+  min-height:100vh;
+  width:100%;
+  gap:0;
+}
+
+/* TOP BAR */
+.top-bar {
+  grid-column:1/-1;
+  background: rgba(0,0,0,0.5);
+  border-bottom:1px solid rgba(255,255,255,0.08);
+  display:flex;
+  align-items:center;
+  padding:0 1rem;
+  gap:1rem;
+}
+
+.top-bar-title {
+  font-family:'Oswald',sans-serif;
+  font-size:1rem;
+  font-weight:600;
+  letter-spacing:0.2em;
+  color:var(--paper-dark);
+  flex:1;
+}
+
+.phase-indicator {
+  font-size:0.75rem;
+  letter-spacing:0.15em;
+  color:var(--ussr-gold);
+  padding:0.25rem 0.75rem;
+  border:1px solid rgba(212,160,23,0.4);
+  text-transform:uppercase;
+}
+
+.top-btn {
+  background:transparent;
+  border:1px solid rgba(255,255,255,0.2);
+  color:var(--paper-dark);
+  font-family:'Special Elite',monospace;
+  font-size:0.75rem;
+  padding:0.25rem 0.75rem;
+  cursor:pointer;
+  transition:all 0.15s;
+}
+.top-btn:hover { background:rgba(255,255,255,0.1); color:#fff; }
+
+/* LEFT PANEL - CPU side */
+.left-panel {
+  background:rgba(0,0,0,0.25);
+  border-right:1px solid rgba(255,255,255,0.06);
+  padding:0.75rem;
+  display:flex;
+  flex-direction:column;
+  gap:0.75rem;
+  overflow-y:auto;
+}
+
+/* CENTER - Table / Battlegrounds */
+.center-panel {
+  display:flex;
+  flex-direction:column;
+  gap:0;
+  overflow:hidden;
+}
+
+/* RIGHT PANEL - Player hand */
+.right-panel {
+  background:rgba(0,0,0,0.3);
+  border-left:1px solid rgba(255,255,255,0.06);
+  padding:0.75rem;
+  display:flex;
+  flex-direction:column;
+  gap:0.75rem;
+  overflow-y:auto;
+}
+
+/* BOTTOM BAR - log */
+.bottom-bar {
+  grid-column:1/-1;
+  background:rgba(0,0,0,0.6);
+  border-top:1px solid rgba(255,255,255,0.08);
+  padding:0.5rem 1rem;
+  font-size:0.72rem;
+  color:var(--paper-dark);
+  min-height:52px;
+  line-height:1.6;
+  font-family:'IM Fell English',serif;
+  font-style:italic;
+  max-height:80px;
+  overflow-y:auto;
+}
+
+/* PANEL LABELS */
+.panel-label {
+  font-family:'Oswald',sans-serif;
+  font-size:0.65rem;
+  font-weight:600;
+  letter-spacing:0.3em;
+  text-transform:uppercase;
+  color:rgba(255,255,255,0.3);
+  padding-bottom:0.5rem;
+  border-bottom:1px solid rgba(255,255,255,0.08);
+  margin-bottom:0.25rem;
+}
+
+/* PLAYER INFO */
+.player-info {
+  display:flex;
+  flex-direction:column;
+  gap:0.35rem;
+}
+
+.player-name {
+  font-family:'Oswald',sans-serif;
+  font-size:1rem;
+  font-weight:700;
+  letter-spacing:0.1em;
+}
+
+.player-name.us { color:#7aaeff; }
+.player-name.ussr { color:#ff8888; }
+
+.prestige-display {
+  font-size:0.8rem;
+  color:var(--ussr-gold);
+}
+
+.cube-pool {
+  display:flex;
+  flex-wrap:wrap;
+  gap:3px;
+  margin-top:0.25rem;
+}
+
+/* CUBES */
+.cube {
+  width:14px;
+  height:14px;
+  border-radius:2px;
+  display:inline-block;
+  border:1px solid rgba(0,0,0,0.4);
+  position:relative;
+  flex-shrink:0;
+}
+/* Cubes sitting on battleground cards are smaller so they fit cleanly */
+.bg-cubes .cube {
+  width:11px;
+  height:11px;
+}
+.cube::after {
+  content:'';
+  position:absolute;
+  top:1px; left:1px;
+  width:5px; height:5px;
+  background:rgba(255,255,255,0.3);
+  border-radius:1px;
+}
+
+.cube.us { background:#2255aa; }
+.cube.ussr { background:#aa2222; }
+.cube.used { opacity:0.25; }
+
+/* CPU HAND */
+.cpu-hand {
+  display:flex;
+  flex-direction:column;
+  gap:0.5rem;
+}
+
+.cpu-card-back {
+  width:100%;
+  height:80px;
+  background: linear-gradient(135deg, #888 0%, #555 100%);
+  border-radius:var(--radius);
+  border:2px solid rgba(255,255,255,0.1);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-family:'Oswald',sans-serif;
+  font-size:0.65rem;
+  letter-spacing:0.2em;
+  color:rgba(255,255,255,0.3);
+  text-transform:uppercase;
+  position:relative;
+  overflow:hidden;
+}
+
+.cpu-card-back .cuba-text {
+  font-family:'Oswald',sans-serif;
+  font-size:0.9rem;
+  font-weight:700;
+  letter-spacing:0.3em;
+  color:rgba(255,255,255,0.15);
+}
+
+/* INITIATIVE SECTION */
+.initiative-section {
+  background:rgba(0,0,0,0.2);
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:4px;
+  padding:0.6rem;
+}
+
+.init-label {
+  font-size:0.65rem;
+  letter-spacing:0.15em;
+  color:rgba(255,255,255,0.4);
+  text-transform:uppercase;
+  margin-bottom:0.4rem;
+}
+
+.bid-controls {
+  display:flex;
+  align-items:center;
+  gap:0.4rem;
+}
+
+.bid-number {
+  background:rgba(0,0,0,0.4);
+  border:1px solid rgba(255,255,255,0.2);
+  color:var(--paper);
+  font-family:'Oswald',sans-serif;
+  font-size:1.1rem;
+  width:42px;
+  text-align:center;
+  padding:0.2rem;
+}
+
+.bid-btn {
+  background:rgba(255,255,255,0.1);
+  border:1px solid rgba(255,255,255,0.2);
+  color:var(--paper);
+  font-size:1rem;
+  width:28px;
+  height:28px;
+  cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:background 0.15s;
+}
+.bid-btn:hover { background:rgba(255,255,255,0.2); }
+
+.confirm-bid-btn {
+  background:rgba(212,160,23,0.2);
+  border:1px solid var(--ussr-gold);
+  color:var(--ussr-gold);
+  font-family:'Special Elite',monospace;
+  font-size:0.7rem;
+  padding:0.3rem 0.6rem;
+  cursor:pointer;
+  letter-spacing:0.1em;
+  transition:all 0.15s;
+  margin-top:0.4rem;
+  width:100%;
+}
+.confirm-bid-btn:hover { background:rgba(212,160,23,0.35); }
+.confirm-bid-btn:disabled { opacity:0.4; cursor:not-allowed; }
+
+/* ===================== TABLE / BATTLEGROUNDS ===================== */
+.table-area {
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+
+.zone {
+  flex:1;
+  padding:0.5rem 0.75rem;
+  position:relative;
+  display:flex;
+  flex-direction:column;
+  min-height:calc(var(--card-h) + 1.5rem);
+  overflow:hidden;
+}
+
+.zone-label {
+  font-family:'Oswald',sans-serif;
+  font-size:0.6rem;
+  letter-spacing:0.3em;
+  text-transform:uppercase;
+  opacity:0.4;
+  margin-bottom:0.4rem;
+  position:relative;
+  z-index:1;
+}
+
+.zone.ussr-zone {
+  background:rgba(139,26,26,0.08);
+  border-bottom:1px solid rgba(139,26,26,0.15);
+}
+
+.zone.neutral-zone {
+  background:rgba(255,255,255,0.03);
+  border-bottom:1px solid rgba(255,255,255,0.08);
+}
+
+.zone.us-zone {
+  background:rgba(26,58,107,0.08);
+}
+
+.zone-cards {
+  display:flex;
+  flex-wrap:wrap;
+  gap:0.5rem;
+  flex:1;
+  align-content:flex-start;
+  padding:0.25rem 0;
+}
+
+/* ===================== BATTLEGROUND CARDS ===================== */
+.battleground {
+  width: var(--card-w);
+  height: var(--card-h);
+  border-radius:var(--radius);
+  position:relative;
+  cursor:pointer;
+  transition:transform 0.15s, box-shadow 0.15s;
+  flex-shrink:0;
+  overflow:hidden;
+}
+
+.battleground:hover {
+  transform:translateY(-4px);
+  z-index:10;
+}
+
+.battleground.selectable {
+  outline:2px solid rgba(255,220,50,0.8);
+  box-shadow:0 0 16px rgba(255,220,50,0.4);
+}
+
+.battleground.selectable:hover {
+  outline-color:rgba(255,220,50,1);
+  box-shadow:0 0 24px rgba(255,220,50,0.6);
+}
+
+.bg-card-inner {
+  width:100%;
+  height:100%;
+  border-radius:var(--radius);
+  overflow:hidden;
+  position:relative;
+  border:2px solid rgba(255,255,255,0.12);
+}
+
+/* The card content rendered from game data */
+.bg-card-paper {
+  width:100%;
+  height:100%;
+  background: var(--paper);
+  display:flex;
+  flex-direction:column;
+  position:relative;
+}
+
+.bg-card-side-banner {
+  width:32px;
+  position:absolute;
+  left:0;
+  top:0;
+  bottom:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.bg-card-side-banner.us { background: var(--us-blue); }
+.bg-card-side-banner.ussr { background: var(--ussr-red); }
+.bg-card-side-banner.neutral { background: var(--neutral-blue); }
+
+.bg-card-side-text {
+  font-family:'Oswald',sans-serif;
+  font-weight:700;
+  font-size:0.55rem;
+  letter-spacing:0.25em;
+  color:rgba(255,255,255,0.9);
+  writing-mode:vertical-rl;
+  text-orientation:mixed;
+  transform:rotate(180deg);
+  white-space:nowrap;
+  text-transform:uppercase;
+}
+
+.bg-card-content {
+  margin-left:32px;
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  padding:0.35rem 0.4rem 0.3rem;
+  gap:0.2rem;
+}
+
+.bg-card-header {
+  display:flex;
+  align-items:center;
+  gap:0.3rem;
+  flex-wrap:wrap;
+}
+
+.bg-card-name {
+  font-family:'Oswald',sans-serif;
+  font-size:0.6rem;
+  font-weight:700;
+  color:var(--ink);
+  letter-spacing:0.05em;
+  text-transform:uppercase;
+  line-height:1.2;
+  flex:1;
+}
+
+.defcon-badge {
+  width:18px;
+  height:18px;
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:0.5rem;
+  font-weight:700;
+  font-family:'Oswald',sans-serif;
+  flex-shrink:0;
+}
+.defcon-badge.orange { background:#e07020; color:#fff; }
+.defcon-badge.green { background:#2a7a2a; color:#fff; }
+.defcon-badge.purple { background:#5a2a8a; color:#fff; }
+
+.command-value {
+  background:var(--ussr-gold);
+  color:var(--ink);
+  border-radius:50%;
+  width:18px;
+  height:18px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Oswald',sans-serif;
+  font-size:0.6rem;
+  font-weight:700;
+  flex-shrink:0;
+}
+
+.bg-card-photo {
+  flex:1;
+  background:#ccc;
+  border-radius:2px;
+  overflow:hidden;
+  display:flex;align-items:center;justify-content:center;
+  font-size:0.5rem;
+  color:rgba(0,0,0,0.3);
+  font-style:italic;
+  min-height:44px;
+  background-size:cover;
+  background-position:center;
+}
+
+.bg-card-event {
+  font-size:0.5rem;
+  color:var(--ink-faded);
+  font-style:italic;
+  line-height:1.3;
+  border-top:1px solid rgba(0,0,0,0.1);
+  padding-top:0.2rem;
+  min-height:28px;
+  font-family:'IM Fell English',serif;
+}
+
+/* CUBES ON BATTLEGROUND — sits inside card at bottom, clipped by overflow:hidden on .battleground */
+.bg-cubes {
+  position:absolute;
+  bottom:0;
+  left:0;
+  right:0;
+  display:flex;
+  justify-content:center;
+  align-items:flex-end;
+  gap:3px;
+  flex-wrap:wrap;
+  padding:3px 4px 4px;
+  z-index:5;
+  min-height:22px;
+  background: linear-gradient(transparent, rgba(0,0,0,0.18));
+}
+
+/* FACEDOWN CUBA CARD */
+.bg-card-facedown {
+  width:100%;
+  height:100%;
+  border-radius:var(--radius);
+  overflow:hidden;
+  display:block;
+}
+.bg-card-facedown svg {
+  width:100%;
+  height:100%;
+  display:block;
+}
+
+/* ===================== HAND CARDS ===================== */
+.hand-area {
+  display:flex;
+  flex-direction:column;
+  gap:0.5rem;
+}
+
+.hand-card {
+  width:100%;
+  background:var(--paper);
+  border-radius:var(--radius);
+  cursor:pointer;
+  transition:transform 0.15s, box-shadow 0.15s;
+  position:relative;
+  overflow:hidden;
+  border:2px solid rgba(255,255,255,0.1);
+  display:flex;
+  min-height:90px;
+}
+
+.hand-card:hover {
+  transform:translateX(-4px);
+  box-shadow:4px 4px 16px rgba(0,0,0,0.5);
+}
+
+.hand-card.selected {
+  outline:2px solid rgba(255,220,50,0.9);
+  box-shadow:0 0 16px rgba(255,220,50,0.4);
+}
+
+.hand-card.disabled {
+  opacity:0.5;
+  cursor:not-allowed;
+}
+.hand-card.disabled:hover { transform:none; box-shadow:none; }
+
+.hc-banner {
+  width:28px;
+  flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+}
+.hc-banner.us { background:var(--us-blue); }
+.hc-banner.ussr { background:var(--ussr-red); }
+.hc-banner.neutral { background:var(--neutral-blue); }
+
+.hc-banner-text {
+  font-family:'Oswald',sans-serif;
+  font-weight:700;
+  font-size:0.45rem;
+  letter-spacing:0.2em;
+  color:rgba(255,255,255,0.8);
+  writing-mode:vertical-rl;
+  transform:rotate(180deg);
+  text-transform:uppercase;
+}
+
+.hc-body {
+  flex:1;
+  padding:0.4rem 0.5rem;
+  display:flex;
+  flex-direction:column;
+  gap:0.2rem;
+}
+
+.hc-name {
+  font-family:'Oswald',sans-serif;
+  font-size:0.7rem;
+  font-weight:700;
+  color:var(--ink);
+  text-transform:uppercase;
+  letter-spacing:0.05em;
+  line-height:1.2;
+}
+
+.hc-badges {
+  display:flex;
+  gap:0.25rem;
+  align-items:center;
+}
+
+.hc-event {
+  font-size:0.58rem;
+  color:var(--ink-faded);
+  font-family:'IM Fell English',serif;
+  font-style:italic;
+  line-height:1.3;
+  flex:1;
+}
+
+.hc-can-event {
+  font-size:0.55rem;
+  color:green;
+  font-weight:bold;
+  display:block;
+  margin-top:0.1rem;
+}
+
+/* ACTION PANEL */
+.action-panel {
+  background:rgba(0,0,0,0.25);
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:4px;
+  padding:0.6rem;
+}
+
+.action-title {
+  font-size:0.65rem;
+  letter-spacing:0.15em;
+  color:rgba(255,255,255,0.5);
+  text-transform:uppercase;
+  margin-bottom:0.5rem;
+}
+
+.action-desc {
+  font-size:0.72rem;
+  color:var(--paper-dark);
+  line-height:1.5;
+  font-family:'IM Fell English',serif;
+  font-style:italic;
+  margin-bottom:0.5rem;
+  min-height:40px;
+}
+
+.action-btn {
+  width:100%;
+  padding:0.4rem 0.75rem;
+  font-family:'Oswald',sans-serif;
+  font-size:0.75rem;
+  font-weight:600;
+  letter-spacing:0.1em;
+  cursor:pointer;
+  border:1px solid;
+  background:transparent;
+  transition:all 0.15s;
+  margin-bottom:0.3rem;
+  text-transform:uppercase;
+}
+
+.action-btn.command {
+  border-color:#4a7fc0;
+  color:#7aaeff;
+}
+.action-btn.command:hover { background:rgba(74,127,192,0.25); }
+.action-btn.command:disabled { opacity:0.3; cursor:not-allowed; }
+
+.action-btn.event-play {
+  border-color:#4a9a4a;
+  color:#88ee88;
+}
+.action-btn.event-play:hover { background:rgba(74,154,74,0.25); }
+.action-btn.event-play:disabled { opacity:0.3; cursor:not-allowed; }
+
+.action-btn.end-turn {
+  border-color:rgba(255,255,255,0.3);
+  color:rgba(255,255,255,0.6);
+}
+.action-btn.end-turn:hover { background:rgba(255,255,255,0.1); }
+
+.action-btn.danger {
+  border-color:#c05050;
+  color:#ff9090;
+}
+.action-btn.danger:hover { background:rgba(192,80,80,0.2); }
+
+/* CUBE PLACEMENT UI */
+.cube-placement {
+  background:rgba(0,0,0,0.3);
+  border:1px solid rgba(255,220,50,0.3);
+  border-radius:4px;
+  padding:0.5rem;
+  margin-top:0.4rem;
+}
+.cube-placement-label {
+  font-size:0.6rem;
+  letter-spacing:0.15em;
+  color:rgba(255,220,50,0.7);
+  text-transform:uppercase;
+  margin-bottom:0.3rem;
+}
+.cube-spinner {
+  display:flex;
+  align-items:center;
+  gap:0.4rem;
+  margin-bottom:0.4rem;
+}
+.cube-count {
+  font-family:'Oswald',sans-serif;
+  font-size:1.2rem;
+  color:var(--paper);
+  min-width:24px;
+  text-align:center;
+}
+
+/* DEFCON TRACK */
+.defcon-track {
+  background:rgba(0,0,0,0.2);
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:4px;
+  padding:0.5rem;
+}
+
+.defcon-row {
+  display:flex;
+  align-items:center;
+  gap:0.35rem;
+  margin-bottom:0.3rem;
+}
+.defcon-label {
+  font-size:0.6rem;
+  color:rgba(255,255,255,0.4);
+  letter-spacing:0.1em;
+  width:52px;
+  flex-shrink:0;
+}
+.defcon-pips {
+  display:flex;
+  gap:3px;
+}
+.defcon-pip {
+  width:12px;
+  height:12px;
+  border-radius:2px;
+  border:1px solid rgba(255,255,255,0.2);
+  background:rgba(255,255,255,0.05);
+  transition:background 0.2s;
+}
+.defcon-pip.active.orange { background:#e07020; border-color:#e07020; }
+.defcon-pip.active.green { background:#2a9a2a; border-color:#2a9a2a; }
+.defcon-pip.active.purple { background:#7a3aaa; border-color:#7a3aaa; }
+.defcon-pip.danger.orange { background:#ff4400; border-color:#ff6600; box-shadow:0 0 6px #ff4400; }
+.defcon-pip.danger.green { background:#00ff44; border-color:#00ff44; box-shadow:0 0 6px #00ff44; }
+.defcon-pip.danger.purple { background:#cc44ff; border-color:#cc44ff; box-shadow:0 0 6px #cc44ff; }
+
+/* ===================== MODAL ===================== */
+.modal-overlay {
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.85);
+  z-index:1000;
+  align-items:center;
+  justify-content:center;
+  padding:1rem;
+}
+.modal-overlay.open { display:flex; }
+
+.modal-box {
+  background: #1a140e;
+  border:1px solid rgba(212,160,23,0.4);
+  max-width:600px;
+  width:100%;
+  max-height:90vh;
+  overflow-y:auto;
+  padding:1.5rem;
+  position:relative;
+}
+
+.modal-close {
+  position:absolute;
+  top:0.75rem;
+  right:0.75rem;
+  background:transparent;
+  border:1px solid rgba(255,255,255,0.2);
+  color:var(--paper-dark);
+  width:28px;height:28px;
+  cursor:pointer;
+  font-size:1.1rem;
+  display:flex;align-items:center;justify-content:center;
+}
+.modal-close:hover { background:rgba(255,255,255,0.1); }
+
+.modal-title {
+  font-family:'Oswald',sans-serif;
+  font-size:1.3rem;
+  font-weight:700;
+  letter-spacing:0.15em;
+  color:var(--ussr-gold);
+  margin-bottom:1rem;
+  text-transform:uppercase;
+}
+
+.rules-section { margin-bottom:1rem; }
+.rules-section h3 {
+  font-family:'Oswald',sans-serif;
+  font-size:0.85rem;
+  font-weight:600;
+  letter-spacing:0.15em;
+  color:var(--paper-dark);
+  text-transform:uppercase;
+  border-bottom:1px solid rgba(255,255,255,0.1);
+  padding-bottom:0.3rem;
+  margin-bottom:0.5rem;
+}
+.rules-section p, .rules-section li {
+  font-size:0.78rem;
+  line-height:1.6;
+  color:rgba(232,223,200,0.8);
+  font-family:'IM Fell English',serif;
+  margin-bottom:0.3rem;
+}
+.rules-section ul { padding-left:1.2rem; }
+
+/* RESULTS MODAL */
+.result-title {
+  font-family:'Oswald',sans-serif;
+  font-size:2rem;
+  font-weight:700;
+  letter-spacing:0.2em;
+  text-align:center;
+  margin:1rem 0;
+  text-transform:uppercase;
+}
+.result-title.win { color:#ffd700; }
+.result-title.lose { color:#cc4444; }
+.result-title.draw { color:#aaaaaa; }
+.result-title.nuke { color:#ff6600; }
+
+.result-detail {
+  font-family:'IM Fell English',serif;
+  font-style:italic;
+  font-size:1rem;
+  text-align:center;
+  color:var(--paper-dark);
+  margin-bottom:1rem;
+  line-height:1.6;
+}
+
+.score-table {
+  width:100%;
+  border-collapse:collapse;
+  margin:1rem 0;
+}
+.score-table th, .score-table td {
+  padding:0.4rem 0.6rem;
+  border:1px solid rgba(255,255,255,0.1);
+  font-size:0.8rem;
+  font-family:'IM Fell English',serif;
+}
+.score-table th {
+  background:rgba(0,0,0,0.3);
+  font-family:'Oswald',sans-serif;
+  font-size:0.7rem;
+  letter-spacing:0.1em;
+  color:var(--paper-dark);
+}
+
+/* INITIATIVE OVERLAY */
+.initiative-overlay {
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.9);
+  z-index:900;
+  align-items:center;
+  justify-content:center;
+  flex-direction:column;
+  gap:1rem;
+}
+.initiative-overlay.open { display:flex; }
+.init-big {
+  font-family:'Oswald',sans-serif;
+  font-size:clamp(1.2rem,3vw,2rem);
+  font-weight:700;
+  letter-spacing:0.2em;
+  color:var(--ussr-gold);
+  text-transform:uppercase;
+  text-align:center;
+}
+.init-result {
+  font-family:'IM Fell English',serif;
+  font-style:italic;
+  font-size:1rem;
+  color:var(--paper-dark);
+  text-align:center;
+  max-width:400px;
+}
+.init-continue-btn {
+  background:rgba(212,160,23,0.2);
+  border:1px solid var(--ussr-gold);
+  color:var(--ussr-gold);
+  font-family:'Oswald',sans-serif;
+  font-size:0.9rem;
+  padding:0.5rem 2rem;
+  cursor:pointer;
+  letter-spacing:0.15em;
+  margin-top:0.5rem;
+}
+.init-continue-btn:hover { background:rgba(212,160,23,0.4); }
+
+/* TOOLTIP */
+.tooltip {
+  position:absolute;
+  background:rgba(10,8,4,0.97);
+  border:1px solid rgba(212,160,23,0.4);
+  padding:0.75rem;
+  max-width:200px;
+  font-size:0.72rem;
+  line-height:1.5;
+  font-family:'IM Fell English',serif;
+  font-style:italic;
+  color:var(--paper-dark);
+  z-index:100;
+  pointer-events:none;
+  border-radius:3px;
+  box-shadow:0 4px 20px rgba(0,0,0,0.6);
+  top:-8px;
+  left:calc(100% + 8px);
+}
+
+/* ZONE HIGHLIGHT */
+.zone.drop-highlight {
+  background:rgba(255,220,50,0.08) !important;
+  border-color:rgba(255,220,50,0.3) !important;
+}
+
+/* DECK PILE */
+.deck-pile {
+  display:flex;
+  align-items:center;
+  gap:0.5rem;
+  padding:0.5rem;
+  background:rgba(0,0,0,0.2);
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:4px;
+}
+.deck-count {
+  font-family:'Oswald',sans-serif;
+  font-size:1.1rem;
+  color:var(--paper-dark);
+}
+.deck-label {
+  font-size:0.6rem;
+  letter-spacing:0.15em;
+  color:rgba(255,255,255,0.3);
+  text-transform:uppercase;
+}
+
+/* Animations */
+@keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+@keyframes pulse { 0%,100%{box-shadow:0 0 8px rgba(255,220,50,0.4)} 50%{box-shadow:0 0 20px rgba(255,220,50,0.8)} }
+@keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
+
+.battleground.selectable { animation:pulse 1.5s ease-in-out infinite; }
+.fadeIn { animation:fadeIn 0.3s ease forwards; }
+
+/* Responsive */
+@media(max-width:900px) {
+  .game-layout { grid-template-columns:160px 1fr 200px; }
+  :root { --card-w:140px; --card-h:196px; }
+}
+@media(max-width:700px) {
+  .game-layout { grid-template-columns:1fr; grid-template-rows:auto; }
+  .left-panel,.right-panel { border:none; }
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width:4px; height:4px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.15); border-radius:2px; }
+</style>
+</head>
+<body>
+
+<!-- ===================== INTRO SCREEN ===================== -->
+<div id="intro-screen" class="screen active">
+  <div class="intro-header">
+    <div class="title-line1">13 MINUTES</div>
+    <div class="title-line2">THE CUBAN MISSILE CRISIS &mdash; 1962</div>
+  </div>
+  <div class="intro-divider"></div>
+  <p class="intro-subtext">
+    A card-driven micro game of superpower brinkmanship.<br>
+    Play five strategy cards. Dominate battlegrounds.<br>
+    Do not trigger nuclear war.
+  </p>
+  <p style="font-size:0.75rem;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:1rem;">Choose your side</p>
+  <div class="side-choice">
+    <button class="side-btn us" onclick="startGame('US')">
+      <span class="flag-icon">🇺🇸</span>
+      KENNEDY<br>
+      <span style="font-size:0.7rem;font-weight:400;opacity:0.7">United States</span>
+    </button>
+    <button class="side-btn ussr" onclick="startGame('USSR')">
+      <span class="flag-icon">☭</span>
+      KHRUSHCHEV<br>
+      <span style="font-size:0.7rem;font-weight:400;opacity:0.7">Soviet Union</span>
+    </button>
+  </div>
+  <button class="side-btn random" onclick="startGame(Math.random()<0.5?'US':'USSR')">
+    🎲 &nbsp; Assign randomly
+  </button>
+  <div style="margin-top:2rem;font-size:0.65rem;letter-spacing:0.1em;color:rgba(255,255,255,0.2);">
+    By Daniel Skjold Pedersen &amp; Asger Harding Granerud
+  </div>
+</div>
+
+<!-- ===================== GAME SCREEN ===================== -->
+<div id="game-screen" class="screen">
+  <div class="game-layout">
+
+    <!-- TOP BAR -->
+    <div class="top-bar">
+      <span class="top-bar-title">13 MINUTES</span>
+      <span class="phase-indicator" id="phase-indicator">INITIATIVE</span>
+      <button class="top-btn" onclick="openRules()">RULES</button>
+      <button class="top-btn" onclick="confirmNewGame()">NEW GAME</button>
+    </div>
+
+    <!-- LEFT PANEL (CPU) -->
+    <div class="left-panel">
+      <div class="panel-label" id="cpu-panel-label">OPPONENT</div>
+
+      <div class="player-info">
+        <div class="player-name" id="cpu-name-display">CPU — KHRUSHCHEV</div>
+        <div class="prestige-display">Prestige: <span id="cpu-prestige">0</span></div>
+      </div>
+
+      <div class="deck-pile">
+        <div>
+          <div class="deck-count" id="deck-count">9</div>
+          <div class="deck-label">Cards Remaining</div>
+        </div>
+      </div>
+
+      <div>
+        <div class="panel-label">HAND</div>
+        <div class="cpu-hand" id="cpu-hand-display">
+          <div class="cpu-card-back"><span class="cuba-text">☭</span></div>
+          <div class="cpu-card-back"><span class="cuba-text">☭</span></div>
+        </div>
+      </div>
+
+      <div class="cube-pool" id="cpu-cubes"></div>
+
+      <!-- DEFCON TRACK -->
+      <div class="defcon-track">
+        <div class="panel-label">DEFCON — CPU SPHERE</div>
+        <div class="defcon-row">
+          <span class="defcon-label">Military</span>
+          <div class="defcon-pips" id="cpu-defcon-orange">
+            <div class="defcon-pip orange"></div>
+            <div class="defcon-pip orange"></div>
+            <div class="defcon-pip orange"></div>
+          </div>
+        </div>
+        <div class="defcon-row">
+          <span class="defcon-label">Political</span>
+          <div class="defcon-pips" id="cpu-defcon-green">
+            <div class="defcon-pip green"></div>
+            <div class="defcon-pip green"></div>
+            <div class="defcon-pip green"></div>
+          </div>
+        </div>
+        <div class="defcon-row">
+          <span class="defcon-label">World Op.</span>
+          <div class="defcon-pips" id="cpu-defcon-purple">
+            <div class="defcon-pip purple"></div>
+            <div class="defcon-pip purple"></div>
+            <div class="defcon-pip purple"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CENTER PANEL -->
+    <div class="center-panel">
+      <div class="table-area">
+        <div class="zone ussr-zone" id="zone-cpu">
+          <div class="zone-label" id="cpu-zone-label">USSR SPHERE OF INFLUENCE</div>
+          <div class="zone-cards" id="cards-cpu"></div>
+        </div>
+        <div class="zone neutral-zone" id="zone-neutral">
+          <div class="zone-label">NEUTRAL ZONE</div>
+          <div class="zone-cards" id="cards-neutral"></div>
+        </div>
+        <div class="zone us-zone" id="zone-player">
+          <div class="zone-label" id="player-zone-label">US SPHERE OF INFLUENCE</div>
+          <div class="zone-cards" id="cards-player"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT PANEL (Player) -->
+    <div class="right-panel">
+      <div class="panel-label" id="player-panel-label">YOUR HAND</div>
+
+      <div class="player-info">
+        <div class="player-name" id="player-name-display">KENNEDY — US</div>
+        <div class="prestige-display">Prestige: <span id="player-prestige">0</span></div>
+      </div>
+
+      <div class="cube-pool" id="player-cubes"></div>
+
+      <!-- DEFCON TRACK (player) -->
+      <div class="defcon-track">
+        <div class="panel-label">DEFCON — YOUR SPHERE</div>
+        <div class="defcon-row">
+          <span class="defcon-label">Military</span>
+          <div class="defcon-pips" id="player-defcon-orange">
+            <div class="defcon-pip orange"></div>
+            <div class="defcon-pip orange"></div>
+            <div class="defcon-pip orange"></div>
+          </div>
+        </div>
+        <div class="defcon-row">
+          <span class="defcon-label">Political</span>
+          <div class="defcon-pips" id="player-defcon-green">
+            <div class="defcon-pip green"></div>
+            <div class="defcon-pip green"></div>
+            <div class="defcon-pip green"></div>
+          </div>
+        </div>
+        <div class="defcon-row">
+          <span class="defcon-label">World Op.</span>
+          <div class="defcon-pips" id="player-defcon-purple">
+            <div class="defcon-pip purple"></div>
+            <div class="defcon-pip purple"></div>
+            <div class="defcon-pip purple"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="hand-area" id="player-hand-display"></div>
+
+      <!-- ACTION PANEL -->
+      <div class="action-panel" id="action-panel">
+        <div class="action-title">ACTION</div>
+        <div class="action-desc" id="action-desc">Select a card from your hand to play.</div>
+
+        <!-- INITIATIVE BIDDING -->
+        <div id="bid-ui">
+          <div class="initiative-section">
+            <div class="init-label">Bid Influence Cubes</div>
+            <div class="bid-controls">
+              <button class="bid-btn" onclick="adjustBid(-1)">−</button>
+              <input type="number" class="bid-number" id="bid-input" value="0" min="0" max="13" readonly>
+              <button class="bid-btn" onclick="adjustBid(1)">+</button>
+            </div>
+            <button class="confirm-bid-btn" id="confirm-bid-btn" onclick="confirmBid()">CONFIRM BID</button>
+          </div>
+        </div>
+
+        <!-- CARD PLAY UI -->
+        <div id="play-ui" style="display:none">
+          <div id="placement-ui" style="display:none">
+            <div class="cube-placement" id="cube-placement-area">
+              <div class="cube-placement-label" id="placement-label">Cubes to place</div>
+              <div class="cube-spinner">
+                <button class="bid-btn" onclick="adjustCubes(-1)">−</button>
+                <span class="cube-count" id="cube-count-display">1</span>
+                <button class="bid-btn" onclick="adjustCubes(1)">+</button>
+              </div>
+              <div style="font-size:0.65rem;color:rgba(255,255,255,0.4);margin-bottom:0.4rem;">
+                Then click a battleground to place.
+              </div>
+            </div>
+          </div>
+
+          <button class="action-btn command" id="btn-command" onclick="chooseCommand()">COMMAND (Place Cubes)</button>
+          <button class="action-btn event-play" id="btn-event" onclick="chooseEvent()">USE EVENT</button>
+          <button class="action-btn end-turn" id="btn-cancel" onclick="cancelPlay()" style="display:none">CANCEL</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- BOTTOM LOG -->
+    <div class="bottom-bar" id="game-log">
+      <em>The world holds its breath. October, 1962...</em>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===================== INITIATIVE OVERLAY ===================== -->
+<div class="initiative-overlay" id="initiative-overlay">
+  <div class="init-big" id="init-big-text">BIDDING FOR INITIATIVE</div>
+  <div class="init-result" id="init-result-text"></div>
+  <button class="init-continue-btn" id="init-continue-btn" onclick="closeInitiative()" style="display:none">CONTINUE →</button>
+</div>
+
+<!-- ===================== RULES MODAL ===================== -->
+<div class="modal-overlay" id="rules-modal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeRules()">✕</button>
+    <div class="modal-title">Rules Reference</div>
+    <div class="rules-section">
+      <h3>Objective</h3>
+      <p>Score the most Prestige at game end. Score 1 Prestige per battleground dominated (2 for Cuba). Avoid triggering Nuclear War.</p>
+    </div>
+    <div class="rules-section">
+      <h3>Turn Structure</h3>
+      <ul>
+        <li>1. Bid for Initiative — highest bid sets turn order; both bids removed.</li>
+        <li>2. Each player plays 1 card, draws 1 card. Repeat.</li>
+        <li>3. Game ends when both players hold 1 card and deck is empty.</li>
+      </ul>
+    </div>
+    <div class="rules-section">
+      <h3>Playing a Card</h3>
+      <p>Place the card face-up as a new battleground (neutral zone or your sphere). Then either:</p>
+      <ul>
+        <li><strong>Command</strong> — place/remove your own cubes on any single battleground (up to the card's number). Placing moves that card toward you; removing moves it away.</li>
+        <li><strong>Event</strong> — only on your own faction's cards or neutral (UN) cards. Follow the card's special instruction.</li>
+      </ul>
+      <p>If you play your opponent's card, they may use its Event before you take your Command.</p>
+    </div>
+    <div class="rules-section">
+      <h3>Domination &amp; Scoring</h3>
+      <p>You dominate a battleground if you have more cubes than your opponent. Ties go to whoever's sphere the card is in. Cuba (face-down card) is worth 2 Prestige.</p>
+    </div>
+    <div class="rules-section">
+      <h3>Aftermath</h3>
+      <p>After the last turn: the player with more cubes on the two leftover hand cards scores 1 Prestige. Then those cards' DEFCON symbols may trigger Nuclear War.</p>
+    </div>
+    <div class="rules-section">
+      <h3>Nuclear War</h3>
+      <p>If 3+ DEFCON symbols of the same colour are in your sphere of influence, you lose. If both players trigger it, no one wins.</p>
+    </div>
+    <div class="rules-section">
+      <h3>DEFCON Colours</h3>
+      <ul>
+        <li>🟠 Orange — Military</li>
+        <li>🟢 Green — Political</li>
+        <li>🟣 Purple — World Opinion</li>
+      </ul>
+    </div>
+    <div class="rules-section">
+      <h3>Cards</h3>
+      <ul>
+        <li><strong>US:</strong> Wave &amp; Smile, EXCOMM, U-2 Photographs, Quarantine, Public Protests</li>
+        <li><strong>USSR:</strong> Strategic Balance, Moscow is our Brain, MRBMs &amp; IRBMs, U-2 Downed, Fidel Castro</li>
+        <li><strong>Neutral (UN):</strong> Containment, To the Brink, U Thant</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== RESULTS MODAL ===================== -->
+<div class="modal-overlay" id="results-modal">
+  <div class="modal-box" style="text-align:center;">
+    <div class="modal-title">CRISIS RESOLVED</div>
+    <div class="result-title" id="result-title-text">VICTORY</div>
+    <div class="result-detail" id="result-detail-text"></div>
+    <table class="score-table" id="score-table">
+      <thead>
+        <tr>
+          <th>Battleground</th>
+          <th>Dominator</th>
+          <th>Prestige</th>
+        </tr>
+      </thead>
+      <tbody id="score-table-body"></tbody>
+    </table>
+    <div style="margin-top:1rem;display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
+      <button class="action-btn command" style="width:auto;padding:0.5rem 1.5rem;" onclick="startGame(G.playerSide)">PLAY AGAIN (same side)</button>
+      <button class="action-btn end-turn" style="width:auto;padding:0.5rem 1.5rem;" onclick="showIntro()">CHANGE SIDE</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// =====================================================================
+// CARD DATA — all 13 cards
+// =====================================================================
+const CARDS_DATA = [
+  // === US CARDS ===
+  {
+    id:'wave_smile', name:'Wave & Smile', side:'US',
+    commandMax:3, commandPlus:false, defcon:'purple',
+    eventDesc:'Place up to 2 Influence cubes on up to two battlegrounds.',
+    flavour:"Sticking to Kennedy's existing presidential schedule allowed the US administration to prepare ahead",
+    eventType:'spread_cubes', eventParam:{maxCubes:2, maxTargets:2},
+  },
+  {
+    id:'excomm', name:'EXCOMM', side:'US',
+    commandMax:3, commandPlus:false, defcon:'green',
+    eventDesc:'Place up to 4 Influence cubes on up to four battlegrounds where YOU currently have no Influence cubes.',
+    flavour:'Establishing the Executive Committee working group immediately created momentum',
+    eventType:'place_on_empty_self', eventParam:{maxCubes:4, maxTargets:4},
+  },
+  {
+    id:'u2_photos', name:'U-2 Photographs', side:'US',
+    commandMax:2, commandPlus:false, defcon:'purple',
+    eventDesc:'Place up to 1 cube on a battleground AND move that battleground one step toward your sphere.',
+    flavour:'Revealing evidence of the Cuban missile sites at an opportune moment would hand the initiative to the US',
+    eventType:'place_and_move_toward', eventParam:{maxCubes:1},
+  },
+  {
+    id:'quarantine', name:'Quarantine', side:'US',
+    commandMax:2, commandPlus:true, defcon:'orange',
+    eventDesc:'Place up to 3 Influence cubes on up to two battlegrounds where the OPPONENT currently has Influence cubes.',
+    flavour:'A naval blockade of Cuba was a limited, but decisive, response, and an opportunity to buy time.',
+    eventType:'place_on_opponent_held', eventParam:{maxCubes:3, maxTargets:2},
+  },
+  {
+    id:'public_protests', name:'Public Protests', side:'US',
+    commandMax:1, commandPlus:false, defcon:'purple',
+    eventDesc:'Move up to two battlegrounds between your sphere and the neutral zone (any mix).',
+    flavour:'In several NATO countries people demonstrated for a non-military solution to the crisis.',
+    eventType:'move_between_own_and_neutral', eventParam:{maxTargets:2},
+  },
+  // === USSR CARDS ===
+  {
+    id:'strategic_balance', name:'Strategic Balance', side:'USSR',
+    commandMax:3, commandPlus:true, defcon:'orange',
+    eventDesc:'Place up to 2 Influence cubes on up to two battlegrounds. Those battlegrounds do NOT move toward the USSR sphere.',
+    flavour:'Nuclear missiles in Cuba would restore the strategic balance.',
+    eventType:'place_no_push_toward_self', eventParam:{maxCubes:2, maxTargets:2},
+  },
+  {
+    id:'moscow_brain', name:'Moscow is our Brain', side:'USSR',
+    commandMax:3, commandPlus:false, defcon:'green',
+    eventDesc:'Place up to 4 Influence cubes on up to two battlegrounds where the USSR player currently has NO Influence cubes.',
+    flavour:'The USSR maintained a strong military and political control of Cuba throughout the crisis',
+    eventType:'place_on_empty_self', eventParam:{maxCubes:4, maxTargets:2},
+  },
+  {
+    id:'mrbms', name:'MRBMs & IRBMs', side:'USSR',
+    commandMax:2, commandPlus:true, defcon:'orange',
+    eventDesc:'Remove up to 4 USSR Influence cubes from up to two battlegrounds, then place them on other battlegrounds.',
+    flavour:'The medium and intermediate-range missiles in Cuba could reach all major US cities',
+    eventType:'redistribute_own_cubes', eventParam:{maxCubes:4, maxFrom:2},
+  },
+  {
+    id:'u2_downed', name:'U-2 Downed', side:'USSR',
+    commandMax:2, commandPlus:false, defcon:'purple',
+    eventDesc:'Move one battleground where the USSR player has Influence cubes to any zone.',
+    flavour:'The USSR responded to continued reconnaissance overflights by shooting down a U-2 aircraft over Cuba',
+    eventType:'move_bg_with_ussr_cubes', eventParam:{},
+  },
+  {
+    id:'fidel', name:'Fidel Castro', side:'USSR',
+    commandMax:1, commandPlus:false, defcon:'green',
+    eventDesc:'Place up to 3 Influence cubes on battlegrounds where the USSR player currently has Influence cubes.',
+    flavour:'While initially opposed to the idea of nuclear missiles in Cuba, Fidel supported Khrushchev.',
+    eventType:'place_on_self_held', eventParam:{maxCubes:3, maxTargets:99},
+  },
+  // === UN / NEUTRAL CARDS ===
+  {
+    id:'containment', name:'Containment', side:'UN',
+    commandMax:2, commandPlus:true, defcon:'orange',
+    eventDesc:'Place up to 3 Influence cubes on a single battleground where YOU currently have Influence cubes.',
+    flavour:'Containment policy was a strategy of isolating the opponent and leaving them few allies and options.',
+    eventType:'place_on_self_held', eventParam:{maxCubes:3, maxTargets:1},
+  },
+  {
+    id:'to_brink', name:'To the Brink', side:'UN',
+    commandMax:1, commandPlus:true, defcon:'orange',
+    eventDesc:"Move one battleground from either player's sphere of influence to the other player's sphere.",
+    flavour:'The chances of something going terribly wrong increased exponentially during mutual escalation.',
+    eventType:'swap_battleground', eventParam:{},
+  },
+  {
+    id:'u_thant', name:'U Thant', side:'UN',
+    commandMax:1, commandPlus:false, defcon:'green',
+    eventDesc:'Remove up to 2 of YOUR own Influence cubes from up to two battlegrounds, then place them on one other battleground.',
+    flavour:'UN Secretary General U Thant served as an intermediary at various times during the crisis',
+    eventType:'redistribute_own_cubes', eventParam:{maxCubes:2, maxFrom:2},
+  },
+];
+
+// =====================================================================
+// GAME STATE
+// =====================================================================
+let G = {};
+
+function initGame(playerSide) {
+  const cpuSide = playerSide === 'US' ? 'USSR' : 'US';
+  G = {
+    playerSide,
+    cpuSide,
+    phase: 'initiative',
+    currentTurn: null,
+    turnsThisRound: 0,
+    round: 1,
+    deck: [],
+    playerHand: [],
+    cpuHand: [],
+    // Each BG: { cardId, zone:'cpu'|'neutral'|'player', cubesUS, cubesUSSR, faceDown, isCuba }
+    battlegrounds: [],
+    playerCubes: 13,
+    cpuCubes: 13,
+    playerUsedCubes: 0,
+    cpuUsedCubes: 0,
+    // UI state
+    selectedCardIdx: null,
+    playMode: null, // 'command' | 'event'
+    cardPlaced: false,    // true once the played card has been committed to the board
+    placedBGIdx: null,    // index of the newly placed battleground
+    pendingCubes: 1,
+    // Multi-step event state
+    eventStep: 0,        // 0=pick targets, 1=pick destination (for redistribute)
+    eventCubesLeft: 0,   // cubes remaining to place in multi-step
+    eventTargetsLeft: 0, // targets remaining
+    eventCubesHeld: 0,   // cubes picked up (redistribute step)
+    eventPickedBGs: [],  // BG indices already used this event
+  };
+
+  // Build deck (all 13 cards)
+  let deck = CARDS_DATA.map(c => c.id);
+  shuffle(deck);
+  G.deck = deck;
+
+  // Deal 2 cards each
+  G.playerHand = [G.deck.pop(), G.deck.pop()];
+  G.cpuHand    = [G.deck.pop(), G.deck.pop()];
+
+  // Cuba: one face-down card in neutral zone
+  const cubaBGCard = G.deck.pop();
+  G.battlegrounds.push({ cardId:cubaBGCard, zone:'neutral', cubesUS:0, cubesUSSR:0, faceDown:true, isCuba:true });
+
+  addLog('October 1962. The world holds its breath. Bid for initiative to begin.');
+}
+
+function shuffle(arr) {
+  for(let i=arr.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]]=[arr[j],arr[i]];
+  }
+}
+
+function cardData(id) { return CARDS_DATA.find(c=>c.id===id)||null; }
+
+// =====================================================================
+// RENDERING
+// =====================================================================
+function render() {
+  const phaseNames = { initiative:'INITIATIVE', play:'STRATEGY', aftermath:'AFTERMATH', end:'GAME OVER' };
+  document.getElementById('phase-indicator').textContent = phaseNames[G.phase]||G.phase.toUpperCase();
+
+  // Names
+  const pName = G.playerSide==='US' ? 'KENNEDY — UNITED STATES' : 'KHRUSHCHEV — SOVIET UNION';
+  const cName = G.cpuSide==='US'    ? 'CPU — KENNEDY'           : 'CPU — KHRUSHCHEV';
+  document.getElementById('player-name-display').textContent = pName;
+  document.getElementById('player-name-display').className  = 'player-name '+(G.playerSide==='US'?'us':'ussr');
+  document.getElementById('cpu-name-display').textContent   = cName;
+  document.getElementById('cpu-name-display').className     = 'player-name '+(G.cpuSide==='US'?'us':'ussr');
+
+  document.getElementById('player-zone-label').textContent = G.playerSide+' SPHERE OF INFLUENCE';
+  document.getElementById('cpu-zone-label').textContent    = G.cpuSide+' SPHERE OF INFLUENCE';
+  document.getElementById('deck-count').textContent = G.deck.length;
+
+  renderCubePool('player-cubes', G.playerSide, G.playerCubes, G.playerUsedCubes);
+  renderCubePool('cpu-cubes',    G.cpuSide,    G.cpuCubes,    G.cpuUsedCubes);
+
+  const scores = calcPrestige();
+  document.getElementById('player-prestige').textContent = scores.player;
+  document.getElementById('cpu-prestige').textContent    = scores.cpu;
+
+  renderCpuHand();
+  renderPlayerHand();
+  renderBattlegrounds();
+  renderDefconTracks();
+  renderActionPanel();
+}
+
+function renderCubePool(elId, side, avail, used) {
+  const el = document.getElementById(elId);
+  el.innerHTML = '';
+  const cls = side==='US'?'us':'ussr';
+  for(let i=0;i<avail+used;i++){
+    const d=document.createElement('div');
+    d.className='cube '+cls+(i>=avail?' used':'');
+    el.appendChild(d);
+  }
+}
+
+function renderCpuHand() {
+  const el = document.getElementById('cpu-hand-display');
+  el.innerHTML = '';
+  G.cpuHand.forEach(() => {
+    const d=document.createElement('div');
+    d.className='cpu-card-back';
+    d.innerHTML='<span class="cuba-text">'+(G.cpuSide==='USSR'?'☭':'★')+'</span>';
+    el.appendChild(d);
+  });
+}
+
+function renderPlayerHand() {
+  const el = document.getElementById('player-hand-display');
+  el.innerHTML = '';
+  if(G.playerHand.length===0) {
+    el.innerHTML='<div style="font-size:0.75rem;color:rgba(255,255,255,0.3);font-style:italic;">No cards in hand.</div>';
+    return;
+  }
+  G.playerHand.forEach((cardId, idx) => {
+    const cd = cardData(cardId);
+    if(!cd) return;
+    const isSelected  = G.selectedCardIdx===idx;
+    const isMyTurn    = G.phase==='play' && G.currentTurn==='player';
+    const canEvent    = canUseEvent(cardId, G.playerSide);
+    const bannerCls   = cd.side==='US'?'us':cd.side==='USSR'?'ussr':'neutral';
+
+    const div=document.createElement('div');
+    div.className='hand-card fadeIn'+(isSelected?' selected':'')+(isMyTurn?'':' disabled');
+    if(isMyTurn) div.onclick=()=>selectCard(idx);
+
+    div.innerHTML=`
+      <div class="hc-banner ${bannerCls}"><span class="hc-banner-text">${cd.name}</span></div>
+      <div class="hc-body">
+        <div class="hc-name">${cd.name}</div>
+        <div class="hc-badges">
+          <span class="command-value">${cd.commandMax}${cd.commandPlus?'+':''}</span>
+          <span class="defcon-badge ${cd.defcon}">${defconLetter(cd.defcon)}</span>
+          <span style="font-size:0.6rem;color:rgba(255,255,255,0.3);margin-left:auto;">${cd.side}</span>
+        </div>
+        <div class="hc-event">${cd.eventDesc}</div>
+        ${canEvent&&isMyTurn?'<span class="hc-can-event">✓ Event available</span>':''}
+      </div>`;
+    el.appendChild(div);
+  });
+}
+
+function defconLetter(c){ return c==='orange'?'M':c==='green'?'P':'W'; }
+
+function renderBattlegrounds() {
+  ['cpu','neutral','player'].forEach(z=>{
+    document.getElementById('cards-'+z).innerHTML='';
+  });
+  G.battlegrounds.forEach((bg,idx)=>{
+    const el=document.getElementById('cards-'+bg.zone);
+    const div=document.createElement('div');
+    div.className='battleground';
+    if(isBGSelectable(idx)) {
+      div.classList.add('selectable');
+      div.onclick=()=>clickBG(idx);
+    }
+
+    if(bg.faceDown){
+      div.innerHTML=`<div class="bg-card-facedown">
+        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 248 347" preserveAspectRatio="xMidYMid slice">
+          <defs><linearGradient id="cbg"><stop offset="0" stop-color="#cacaca"/><stop offset="1" stop-color="#9d9d9d"/></linearGradient><linearGradient xlink:href="#cbg" id="cbg2" x1="95" x2="208" y1="-0.5" y2="350" gradientUnits="userSpaceOnUse"/></defs>
+          <path fill="url(#cbg2)" d="M0 0h248v347H0z"/>
+          <path fill="#666" fill-rule="evenodd" d="M72.215 144.884c-2.444.25-5.115.052-7.203 1.15-1.966.644-3.484 2.377-5.723 2.32-3.013.374-6.073.192-9.065.77-2.26-.1-4.57.708-5.746 2.604-1.053-.51-1.95-.548-2.394.406-1.94.659-3.708 1.739-5.723 2.223-1.602.578-4.618 1.664-5.402 1.705.3.897-2.225 1.888-3.02 2.879-1.712 1.614-3.74 3.356-4.577 5.663-1.474 1.998.85 3.59 1.313 5.123 1.02.19 1.95.845.54 1.467-1.76-.445-3.6-.898-5.335-.12-1.829.95-3.706 1.886-5.695 2.434-1.38-.478-3.045.83-1.15 1.698 1.985 1.155 3.401-1.287 5.157-1.862 1.57-1.248 4.998-.073 3.316 2.108-.668 2.369 2.653-.176 3.322-.805 1.8-2.084 4.62-1.042 6.762-2.124 1.212-1.538-.316-4.597 2.52-5.173 2.216-.02 5.08.73 6.642-1.398.721 2.506 4.523 1.043 5.135-.86 1.012-2.025 3.6-.97 4.214-3.342 1.21-2.245 3.816-2.46 5.73-3.661 1.202-1.31 1.935-3.024 4.034-2.09 3.496.517 7.033-.247 10.525.402 1.974.418 3.986-.457 5.981.023 1.786.302 3.476 1.463 4.44 2.935-.863 1.989-3.386 2.486-5.424 2.33-1.634.368-4.273-.842-5.203.973 1.522 1.892 4.424 1.977 6.164 3.697.57 1.759 3.144.127 3.785.86 1.113-.472 2.806-.044 4.002-.09 1.994-.151 1.95 3.538 3.744 1.84.867-1.596 1.5-.157 1.736.488.372-.964-.76-5.047.962-3.5.199 2.305 1.963 4.697 4.501 4.452 3.009-.186 6.064-.625 9.054-.182 1.845-.37-1.756-3.56.79-2.415 1.207.71 1.587 2.049.705 2.55 1.848 1.87 3.578 4.143 6.222 4.892 2.172-.393 2.202 2.977 4.25 1.744 1.334-.41 1.085 2.49 2.676.84 1.596-.387 4.207 1.822 5.4 1.5.77.58.797-.69 1.189.479 1.774 1.022 4.118.844 5.926 1.58 2.567-.753 5.219-1.03 7.682-1.767 1.046-.385 2.978.073 2.07 1.278 2.282.47 3.143 2.847 3.598 4.893.647 1.38.92 2.082.74 3.477.748 2.022.413 4.133 2.806 5.024 1.957 1.404 3.868 2.872 5.428 4.718 1.934 2.15 4.908.356 7.298 1.044 2.552.469 5.404.925 7.957.087 1.37-.657 2.764 1.264 3.47 1.63-1.25 1.658.391 2.28 1.823 2.294 1.694 1.476.203 4.798-1.757 5.286-1.945 1.14-3.971 2.13-5.707 3.555-1.915 1.462-4.15 3.102-4.75 5.536.498 2.6 3.84-.048 5.616.68 2.47-.226 4.537-2.224 7.189-1.008 2.036.634 3.933-.596 5.921-.875 3.418-.682 6.953-.172 10.378-.87 2.487-1.083 4.9.73 7.392.334 1.21-.108 2.37-2.056 2.353-.353 2.392.408 4.578 1.393 6.865 1.906 2.155-.122 4.885.576 6.603-1.032.753-1.13.132-2.754 1.925-2.63.011 1.38-1.071 2.08-1.006 3.352 2.027.25 3.756-.937 5.288-2.155 1.943-1.84 4.7-.804 7.041-1.325 1.945-.596 4.457-.4 6.112-.648 1.328-1.265 3.845-4.117.604-4.856-2.647.58-5.383-.102-6.804-2.605-1.408-1.863-3.412-3.165-5.111-4.618-2.225-.588-4.487-1.877-6.876-1.306-2.47-.8-5.14-.738-7.558-1.636-1.104-.876-2.476-2.213-2.793-3.53 2.662-1.612-.244-3.696-1.934-4.497-1.157.103-2.723-.073-3.443.487-1.354-.29-2.818 1.31-3.98-.051-1.48-.173-1.938-2.287-3.668-2.653-2.168-1.652-4.863-.797-7.272-1.365-1.134-.52-.62-2.053-2.23-1.71-2.967-.488-5.133-2.626-7.06-4.748-2.128-1.793-4.472-3.404-7.006-4.56-1.867-.34 3.062 4.199-.237 2.965-1.14-.973-.623-3.382-2.715-2.614-2.428.442-4.074-1.16-5.64-2.675-1.664-1.934 1.662-1.845 2.499-.77-.346-.89 1.301.15 1.244-1.188.981-2.142-2.583-2.432-2.872-1.997-.71-1.1-2.99-.346-3.58-.17-.252 2.124 4.329.55 2.233 2.57-.589.769-.858 2.702-1.967 1.007-1.328-2.117-2.964-4.237-5.546-4.836-2.498-.36-3.7-2.69-6.14-3.192-1.556-.49-3.127-2.313-4.599-2.127 1.066 1.579-1.326 1.018-1.579-.234-1.55-.962-3.806-.13-5.696-.201-1.967.196-4.088.332-5.886-.646-1.639-2.073-4.41-3.262-5.243-5.926-.848-2.36-3.899-1.63-5.148-3.221-.492-1.043 2.208-1.536.276-1.147-2.055 1.703-2.935-1.061-4.653-1.542-2.24-.217-4.42 1.484-6.63.14-1.756-.931-4.35-1.314-4.643-3.72.238-1.643-.956 1.19-2.11.525-2.155-.651-4.331 1.61-6.107-.282-1.468-.306-2.565 2.81-4.123.82-1.33-2.593-4.622-1.33-6.423.035-.833.185-.562-3.033-2.44-2.137-2.88.33-5.786.148-8.556-.733"/>
+          <path stroke-linecap="round" stroke-width="6" d="M70.83 86.617q3.4-.352 5.312-2.66 2.463-2.906 2.333-9.098l3.225.788q.034 9.165-5.445 12.746-2.051 1.332-5.12 1.71ZM60.266 70.661q1.337 15.281 8.14 16.168l.305 3.487q-7.602.335-12.748-4.841-5.03-5.105-5.77-13.549-.764-8.744 3.5-14.908 2.025-2.895 4.97-4.69 2.944-1.794 6.54-2.109l.305 3.487q-5.293 1.314-5.475 10.525-.074 2.916.233 6.43m7.361-20.654q2.262.131 3.852.733 1.617.6 2.188.852.598.25.98.216.381-.033.615-.493.262-.462.53-1.171l2.587-.227 1.23 14.056-2.07.18q-.765-.893-1.857-3.02-1.094-2.156-1.8-3.329-.68-1.176-1.531-2.117-1.968-2.106-4.419-2.193Zm40.63 33.336q4.062-.63 5.484-2.896 1.299-2.09.908-6.557l-1.885-21.546q-.167-1.907-1.638-2.41-.653-.245-1.427-.314-.75-.1-1.487-.364l-.17-1.934 11.932-1.044.169 1.934q-.573.352-1.27.55-.668.196-1.246.494-1.307.745-1.155 2.489l1.88 21.492q.506 5.775-1.63 8.98-2.281 3.412-8.16 4.612Zm-2.119 3.698q-12.285 1.075-15.514-4.461-1.096-1.853-1.322-4.441l-2.085-23.835q-.15-1.716-1.562-2.169-.594-.195-1.314-.27-.695-.103-1.353-.402l-.17-1.934 17.325-1.516.17 1.934q-.737.366-1.46.567-.726.173-1.277.468-1.233.657-1.085 2.346l2.002 22.881q.474 5.421 4.111 6.832 1.335.515 3.229.514Zm32.474-25.376q7.628-.667 6.998-7.858-.45-5.149-4.472-6.252-1.377-.373-2.33-.29l-1.145.1q-.163.015-.297.054l-.231-2.642 4.685-.41q6.483-.567 9.773 1.588 3.315 2.125 3.704 6.565.331 3.786-2.302 6.322-2.33 2.235-6.531 3.152l.01.109q5.108-.282 8.504 1.836 3.748 2.362 4.155 7.02.415 4.74-2.983 7.946-3.725 3.538-11.161 4.188l-4.468.391-.262-2.996q.473.068 1.426-.015 8.118-.71 7.424-8.637-.693-7.927-10.227-7.093Zm-.515 22.031-12.939 1.132-.176-2.015q.709-.364 1.378-.56.694-.226 1.242-.548 1.146-.704.999-2.393l-2.476-28.302q-.15-1.716-1.402-2.21-.595-.223-1.316-.297-.695-.104-1.457-.34l-.178-2.042 12.939-1.132Zm34.501-36.093-4.027-.856q.063-1.158.039-2.062-.027-.93.075-1.653 2.277-1.27 7.72-2.432.862-.185 1.516-.243.752.758 1.116 1.467l15.39 30.658q1.001 2.026 2.152 2.941 1.175.886 2.822.879l.176 2.016-17.406 1.522-.15-1.716q.645-.468 1.336-.72.717-.283 1.3-.526 1.274-.496 1.188-1.476-.048-.545-.682-1.835Zm1.2 8.376-4.595 18.079q-.328 1.264-.257 2.081t.575 1.24q.502.395 1.206.608.73.183 1.537.305.806.121 1.518.416l.162 1.852-13.047 1.142-.162-1.853q.513-.401 1.12-.674.636-.275 1.258-.687 1.447-1.032 2.029-3.169l6.436-24.004Zm6.023 12.374-6.701.586.646-2.966 4.713-.412Z" aria-label="CUBA" font-family="'Stardos Stencil'" font-size="56" font-weight="700" text-anchor="middle" transform="translate(0 19.597)"/>
+          <circle cx="124" cy="276.479" r="24" fill="#fce550"/>
+          <path d="M113.76 292.837v-5.673q1.815-2.11 3.494-3.88 1.702-1.792 3.154-3.358 1.475-1.566 2.677-2.972 1.203-1.43 2.065-2.814 1.792-2.904 1.792-5.922 0-3.381-1.61-5.06-.523-.544-1.203-.816v-2.452q4.787.092 7.67 2.632 2.88 2.519 2.88 6.558 0 3.721-4.151 8.01-1.816 1.883-5.332 5.105-3.495 3.2-5.809 5.468h2.45v5.174Zm10.165-5.174h2.269q3.993 0 5.24-2.405.341-.658.614-1.316.68-1.724 1.384-2.224h.885v11.119h-10.392Zm-1.815-25.571q-2.678.204-3.767 1.906-.318.499-.386 1.043 1.884.114 2.837 1.452.748 1.044.748 2.133 0 1.067-.249 1.702-.25.635-.726 1.112-.953.998-2.27.998-1.292 0-2.04-.34-.75-.34-1.272-.953-1.066-1.226-1.066-2.972 0-1.748.567-3.087.59-1.36 1.656-2.428 2.27-2.268 5.968-2.768Z" font-family="'Stardos Stencil'" font-size="56" font-weight="700" text-anchor="middle"/>
+        </svg>
+      </div>`;
+    } else {
+      const cd=cardData(bg.cardId);
+      if(!cd){el.appendChild(div);return;}
+      const bannerCls=cd.side==='US'?'us':cd.side==='USSR'?'ussr':'neutral';
+      const cubesUS=bg.cubesUS||0, cubesUSSR=bg.cubesUSSR||0;
+      div.innerHTML=`
+        <div class="bg-card-inner">
+          <div class="bg-card-paper">
+            <div class="bg-card-side-banner ${bannerCls}"><span class="bg-card-side-text">${cd.name}</span></div>
+            <div class="bg-card-content">
+              <div class="bg-card-header">
+                <span class="bg-card-name">${cd.name}</span>
+                <span class="defcon-badge ${cd.defcon}" title="${cd.defcon} DEFCON">${defconLetter(cd.defcon)}</span>
+                <span class="command-value">${cd.commandMax}${cd.commandPlus?'+':''}</span>
+              </div>
+              <div class="bg-card-photo" style="background:${sideColor(cd.side)};">
+                <span style="font-size:2rem;opacity:0.35;">${cd.side==='US'?'🦅':cd.side==='USSR'?'☭':'🕊'}</span>
+              </div>
+              <div class="bg-card-event">${cd.eventDesc.substring(0,90)}…</div>
+            </div>
+          </div>
+        </div>
+        <div class="bg-cubes">
+          ${Array(cubesUS).fill('<div class="cube us"></div>').join('')}
+          ${Array(cubesUSSR).fill('<div class="cube ussr"></div>').join('')}
+        </div>`;
+    }
+    el.appendChild(div);
+  });
+}
+
+function sideColor(s){ return s==='US'?'#c8d8e8':s==='USSR'?'#e8c8c8':'#d8d8c8'; }
+
+function renderDefconTracks() {
+  ['player','cpu'].forEach(who=>{
+    const zone=who;
+    const counts=countDefconInZone(zone);
+    ['orange','green','purple'].forEach(color=>{
+      const el=document.getElementById(`${who}-defcon-${color}`);
+      if(!el) return;
+      const pips=el.querySelectorAll('.defcon-pip');
+      const n=counts[color]||0;
+      pips.forEach((pip,i)=>{
+        pip.classList.remove('active','danger');
+        if(i<n){ pip.classList.add('active'); if(n>=3) pip.classList.add('danger'); }
+      });
+    });
+  });
+}
+
+function renderActionPanel() {
+  const bidUI  = document.getElementById('bid-ui');
+  const playUI = document.getElementById('play-ui');
+  const desc   = document.getElementById('action-desc');
+  const placUI = document.getElementById('placement-ui');
+  const btnCmd = document.getElementById('btn-command');
+  const btnEvt = document.getElementById('btn-event');
+  const btnCnl = document.getElementById('btn-cancel');
+
+  if(G.phase==='initiative'){
+    bidUI.style.display='block';
+    playUI.style.display='none';
+    desc.textContent='Bid Influence cubes secretly. Highest bid goes first. Both bids are permanently removed from the game.';
+    const maxBid=G.playerCubes;
+    document.getElementById('bid-input').max=maxBid;
+    return;
+  }
+
+  bidUI.style.display='none';
+  playUI.style.display='block';
+
+  if(G.phase!=='play'){
+    desc.textContent=''; placUI.style.display='none';
+    btnCmd.style.display='none'; btnEvt.style.display='none'; btnCnl.style.display='none';
+    return;
+  }
+
+  btnCmd.style.display='block'; btnEvt.style.display='block';
+  // Always clear handlers first so stale closures can never fire
+  btnCmd.onclick=null; btnEvt.onclick=null;
+
+  if(G.currentTurn!=='player'){
+    desc.textContent='Opponent is playing…';
+    btnCmd.disabled=true; btnEvt.disabled=true; btnCnl.style.display='none'; placUI.style.display='none';
+    return;
+  }
+
+  if(G.selectedCardIdx===null){
+    desc.textContent='Select a card from your hand to play it as a new battleground.';
+    btnCmd.disabled=true; btnEvt.disabled=true; btnCnl.style.display='none'; placUI.style.display='none';
+    return;
+  }
+
+  // Read the card being played — from placed BG once on table, else still in hand
+  const activeCardId = G.cardPlaced
+    ? G.battlegrounds[G.placedBGIdx]?.cardId
+    : G.playerHand[G.selectedCardIdx];
+  const cd=cardData(activeCardId);
+  if(!cd) return;
+  btnCnl.style.display='block';
+
+  // STEP 1: Choose where to place the card on the table
+  if(!G.cardPlaced){
+    desc.textContent=`"${cd.name}" selected — place it on the table first. Choose a zone:`;
+    btnCmd.textContent='PLACE IN YOUR SPHERE'; btnCmd.disabled=false;
+    btnCmd.onclick=()=>placeCardInZone('player');
+    btnEvt.textContent='PLACE IN NEUTRAL ZONE'; btnEvt.disabled=false;
+    btnEvt.onclick=()=>placeCardInZone('neutral');
+    placUI.style.display='none';
+    return;
+  }
+
+  // STEP 2: Card is on the table — choose Command or Event
+  if(!G.playMode){
+    desc.textContent=`"${cd.name}" is on the table. Now choose your action:`;
+    btnCmd.textContent='COMMAND — Place Cubes'; btnCmd.disabled=false; btnCmd.onclick=startCommand;
+    const evtReason=canUseEventReason(cd.id, G.playerSide);
+    const evtOk=!evtReason;
+    btnEvt.textContent='EVENT — '+cd.name+(evtReason?' ('+evtReason+')':'');
+    btnEvt.disabled=!evtOk; btnEvt.onclick=evtOk?startEvent:null;
+    placUI.style.display='none';
+    return;
+  }
+
+  // STEP 3a: Command — set cubes and click a battleground
+  if(G.playMode==='command'){
+    const max=cd.commandMax;
+    desc.textContent=`COMMAND: Set cubes then click a battleground. Max ${max} cube(s). You have ${G.playerCubes} remaining.`;
+    btnCmd.textContent='✓ Click a battleground to place'; btnCmd.disabled=true; btnCmd.onclick=null;
+    btnEvt.disabled=true;
+    placUI.style.display='block';
+    document.getElementById('placement-label').textContent=`Cubes to place (max ${max})`;
+    document.getElementById('cube-count-display').textContent=G.pendingCubes;
+    return;
+  }
+
+  // STEP 3b: Event — click a highlighted battleground
+  if(G.playMode==='event'){
+    desc.textContent='EVENT: '+cd.eventDesc+(G.eventStep>0?' — Now click a battleground to place the cubes.':' — Click a highlighted battleground.');
+    btnEvt.textContent='Waiting for battleground click…'; btnEvt.disabled=true; btnEvt.onclick=null;
+    btnCmd.disabled=true;
+    const needsCubeCount=['spread_cubes','place_on_empty_self','place_on_opponent_held','place_no_push_toward_self','place_on_self_held','place_and_move_toward','redistribute_own_cubes'].includes(cd.eventType);
+    placUI.style.display=needsCubeCount?'block':'none';
+    if(needsCubeCount){
+      document.getElementById('placement-label').textContent=`Cubes for this target (max ${Math.min(cd.eventParam.maxCubes||1,G.playerCubes)})`;
+      document.getElementById('cube-count-display').textContent=G.pendingCubes;
+    }
+    return;
+  }
+}
+
+function eventNeedsBGClick(eventType){
+  // All events need at least one battleground click, except none right now
+  return true;
+}
+
+// =====================================================================
+// PRESTIGE / DEFCON
+// =====================================================================
+function countDefconInZone(zone) {
+  const counts={orange:0,green:0,purple:0};
+  G.battlegrounds.forEach(bg=>{
+    if(bg.zone===zone && !bg.faceDown){
+      const cd=cardData(bg.cardId);
+      if(cd) counts[cd.defcon]=(counts[cd.defcon]||0)+1;
+    }
+  });
+  return counts;
+}
+
+function calcPrestige() {
+  let player=0, cpu=0;
+  G.battlegrounds.forEach(bg=>{
+    if(bg.faceDown) return;
+    const pc = playerCubesOnBG(bg);
+    const cc = cpuCubesOnBG(bg);
+    const pts = bg.isCuba?2:1;
+    let winner=null;
+    if(pc>cc) winner='player';
+    else if(cc>pc) winner='cpu';
+    else { winner=(bg.zone==='player'?'player':bg.zone==='cpu'?'cpu':null); }
+    if(winner==='player') player+=pts;
+    else if(winner==='cpu') cpu+=pts;
+  });
+  return {player,cpu};
+}
+
+function playerCubesOnBG(bg){ return G.playerSide==='US'?bg.cubesUS:bg.cubesUSSR; }
+function cpuCubesOnBG(bg){    return G.cpuSide==='US'?bg.cubesUS:bg.cubesUSSR; }
+
+// =====================================================================
+// INITIATIVE
+// =====================================================================
+function adjustBid(delta){
+  const inp=document.getElementById('bid-input');
+  let v=parseInt(inp.value)||0;
+  inp.value=Math.max(0,Math.min(G.playerCubes,v+delta));
+}
+
+function confirmBid(){
+  if(G.phase!=='initiative') return;
+  const pBid=Math.max(0,Math.min(G.playerCubes, parseInt(document.getElementById('bid-input').value)||0));
+  const cBid=Math.floor(Math.random()*Math.min(4,G.cpuCubes+1));
+
+  // Remove cubes
+  G.playerCubes-=pBid; G.playerUsedCubes+=pBid;
+  G.cpuCubes-=cBid;    G.cpuUsedCubes+=cBid;
+
+  const overlay=document.getElementById('initiative-overlay');
+  overlay.classList.add('open');
+  document.getElementById('init-big-text').textContent='BIDS REVEALED';
+
+  let msg=`You bid ${pBid}. CPU bid ${cBid}. `;
+  if(pBid>cBid){
+    G.currentTurn='player';
+    msg+='You win initiative — you play first this round.';
+  } else if(cBid>pBid){
+    G.currentTurn='cpu';
+    msg+='CPU wins initiative — they play first this round.';
+  } else {
+    G.currentTurn=Math.random()<0.5?'player':'cpu';
+    msg+=`Tied! Coin flip: ${G.currentTurn==='player'?'You':'CPU'} play first.`;
+  }
+
+  document.getElementById('init-result-text').textContent=msg;
+  document.getElementById('init-continue-btn').style.display='block';
+  G.phase='play';
+  addLog(msg);
+}
+
+function closeInitiative(){
+  document.getElementById('initiative-overlay').classList.remove('open');
+  G.turnsThisRound=0;
+  G.selectedCardIdx=null; G.playMode=null;
+  document.getElementById('bid-input').value=0;
+  render();
+  if(G.currentTurn==='cpu') setTimeout(doCpuTurn,600);
+}
+
+// =====================================================================
+// PLAYER TURN — UI FLOW
+// =====================================================================
+function selectCard(idx){
+  if(G.phase!=='play'||G.currentTurn!=='player') return;
+  // Deselect if clicking the same card again
+  if(G.selectedCardIdx===idx && !G.cardPlaced){
+    G.selectedCardIdx=null; G.playMode=null; G.cardPlaced=false; G.placedBGIdx=null;
+    G.pendingCubes=1; G.eventStep=0; G.eventCubesHeld=0; G.eventPickedBGs=[];
+    render(); return;
+  }
+  G.selectedCardIdx=idx;
+  G.playMode=null; G.cardPlaced=false; G.placedBGIdx=null;
+  G.pendingCubes=1; G.eventStep=0; G.eventCubesHeld=0; G.eventPickedBGs=[];
+  // Immediately prompt for zone placement — card goes to table first
+  render();
+}
+
+function startCommand(){
+  if(G.selectedCardIdx===null||!G.cardPlaced) return;
+  const cd=cardData(G.battlegrounds[G.placedBGIdx]?.cardId);
+  if(!cd) return;
+  G.playMode='command';
+  G.pendingCubes=Math.min(1,Math.min(cd.commandMax, G.playerCubes));
+  render();
+}
+
+function startEvent(){
+  if(G.selectedCardIdx===null||!G.cardPlaced||G.placedBGIdx===null) return;
+  const cardId=G.battlegrounds[G.placedBGIdx]?.cardId;
+  const cd=cardData(cardId);
+  if(!cd) return;
+  if(!canUseEvent(cardId, G.playerSide)) return;
+  G.playMode='event';
+  G.eventStep=0; G.eventCubesHeld=0; G.eventCubesLeft=0; G.eventPickedBGs=[];
+  G.pendingCubes=Math.min(1, Math.min(cd.eventParam?.maxCubes||1, G.playerCubes));
+  addLog(`EVENT: ${cd.name} — ${cd.eventDesc}`);
+  render();
+}
+
+// Player chose which zone to place the card in — card goes to table immediately
+function placeCardInZone(zone){
+  if(G.selectedCardIdx===null||G.cardPlaced) return;
+  const cardId=G.playerHand[G.selectedCardIdx];
+  G.playerHand.splice(G.selectedCardIdx,1);
+  G.battlegrounds.push({cardId,zone,cubesUS:0,cubesUSSR:0,faceDown:false,isCuba:false});
+  G.placedBGIdx=G.battlegrounds.length-1;
+  G.cardPlaced=true;
+  if(G.deck.length>0) G.playerHand.push(G.deck.pop());
+  const cd=cardData(cardId);
+  addLog(`${cd.name} placed face-up in the ${zone==='player'?G.playerSide+' sphere':'neutral zone'}. Now choose Command or Event.`);
+  render();
+}
+
+function cancelPlay(){
+  // If card was already placed on board, remove it and return to hand
+  if(G.cardPlaced && G.placedBGIdx!==null){
+    const bg=G.battlegrounds[G.placedBGIdx];
+    if(bg) G.playerHand.splice(G.selectedCardIdx,0,bg.cardId);
+    G.battlegrounds.splice(G.placedBGIdx,1);
+    // Also return any drawn replacement card
+    if(G.deck.length>=0 && G.playerHand.length>2){
+      G.deck.push(G.playerHand.pop());
+    }
+  }
+  G.selectedCardIdx=null; G.playMode=null; G.cardPlaced=false; G.placedBGIdx=null;
+  G.pendingCubes=1; G.eventStep=0; G.eventCubesHeld=0; G.eventPickedBGs=[];
+  render();
+}
+
+function adjustCubes(delta){
+  if(G.selectedCardIdx===null) return;
+  const cd=cardData(G.playerHand[G.selectedCardIdx]);
+  const maxC = G.playMode==='command' ? cd.commandMax : (cd.eventParam.maxCubes||1);
+  G.pendingCubes=Math.max(1,Math.min(maxC,Math.min(G.playerCubes,G.pendingCubes+delta)));
+  document.getElementById('cube-count-display').textContent=G.pendingCubes;
+}
+
+function canUseEvent(cardId, actorSide){
+  const cd=cardData(cardId);
+  if(!cd) return false;
+  return cd.side===actorSide || cd.side==='UN';
+}
+
+function canUseEventReason(cardId, actorSide){
+  const cd=cardData(cardId);
+  if(!cd) return 'No card';
+  if(cd.side!==actorSide && cd.side!=='UN') return 'Opponent\'s card — Command only';
+  return null; // eligible; if no targets exist the board will show nothing highlighted
+}
+
+// =====================================================================
+// BATTLEGROUND SELECTION
+// =====================================================================
+function isBGSelectable(idx){
+  if(G.phase!=='play'||G.currentTurn!=='player'||G.selectedCardIdx===null) return false;
+  if(!G.playMode) return false;
+  if(!G.cardPlaced) return false; // must place the card on the table first
+  const bg=G.battlegrounds[idx];
+  if(!bg) return false;
+  if(G.playMode==='command') return true; // any BG including face-down Cuba
+
+  // Event targeting — read card from placed battleground, not hand
+  const cd=cardData(G.battlegrounds[G.placedBGIdx]?.cardId);
+  if(!cd) return false;
+  return isValidEventTarget(idx, cd, G.playerSide);
+}
+
+function isValidEventTarget(bgIdx, cd, actorSide){
+  const bg=G.battlegrounds[bgIdx];
+  if(!bg) return false;
+  // Face-down Cuba: only allow placement events on it, not movement events
+  if(bg.faceDown){
+    const placementEvents=['spread_cubes','place_on_empty_self','place_on_opponent_held',
+      'place_no_push_toward_self','place_on_self_held','place_and_move_toward'];
+    return placementEvents.includes(cd.eventType);
+  }
+  const actorZone  = actorSide===G.playerSide?'player':'cpu';
+  const oppZone    = actorSide===G.playerSide?'cpu':'player';
+  const myC  = actorSide==='US'?bg.cubesUS:bg.cubesUSSR;
+  const oppC = actorSide==='US'?bg.cubesUSSR:bg.cubesUS;
+
+  switch(cd.eventType){
+    case 'spread_cubes':              return true;
+    case 'place_on_empty_self':       return myC===0;
+    case 'place_and_move_toward':     return true;
+    case 'place_on_opponent_held':    return oppC>0;
+    case 'move_between_own_and_neutral': return bg.zone===actorZone||bg.zone==='neutral';
+    case 'place_no_push_toward_self': return true;
+    case 'redistribute_own_cubes':
+      if(G.eventStep===0) return myC>0; // picking source
+      else return !G.eventPickedBGs.includes(bgIdx); // picking destination
+    case 'move_bg_with_ussr_cubes':   return bg.cubesUSSR>0;
+    case 'place_on_self_held':        return myC>0;
+    case 'swap_battleground':         return bg.zone===actorZone||bg.zone===oppZone;
+    default: return true;
+  }
+}
+
+// =====================================================================
+// BATTLEGROUND CLICK
+// =====================================================================
+function clickBG(idx){
+  if(!isBGSelectable(idx)) return;
+  if(G.playMode==='command'){
+    doPlayerCommand(idx);
+  } else if(G.playMode==='event'){
+    doPlayerEvent(idx);
+  }
+}
+
+// ---- COMMAND ----
+function doPlayerCommand(bgIdx){
+  const cd=cardData(G.battlegrounds[G.placedBGIdx]?.cardId||'');
+  const n=Math.min(G.pendingCubes, G.playerCubes);
+  const bg=G.battlegrounds[bgIdx];
+
+  // Place cubes on the chosen battleground
+  if(G.playerSide==='US'){ bg.cubesUS+=n; } else { bg.cubesUSSR+=n; }
+  G.playerCubes-=n; G.playerUsedCubes+=n;
+  moveBGToward(bgIdx, 'player');
+
+  addLog(`Command: placed ${n} cube(s) on ${cardData(bg.cardId)?.name||'battleground'}.`);
+  endPlayerTurn();
+}
+
+// ---- EVENT ----
+function doPlayerEvent(bgIdx){
+  const cardId=G.battlegrounds[G.placedBGIdx]?.cardId;
+  const cd=cardData(cardId);
+  if(!cd) return;
+  const bg=G.battlegrounds[bgIdx];
+  const actorSide=G.playerSide;
+  const actorZone='player';
+  const oppZone='cpu';
+
+  switch(cd.eventType){
+
+    case 'spread_cubes': {
+      // Wave & Smile: up to 2 cubes on up to 2 BGs
+      const n=Math.min(G.pendingCubes, G.playerCubes, cd.eventParam.maxCubes);
+      placeCubes(bgIdx,actorSide,n);
+      G.eventPickedBGs.push(bgIdx);
+      const remaining=cd.eventParam.maxTargets-G.eventPickedBGs.length;
+      if(remaining>0 && G.playerCubes>0){
+        addLog(`Placed ${n} cube(s). You may click ${remaining} more battleground(s), or Cancel to end.`);
+        // Stay in event mode so they can pick another BG
+        render(); return;
+      }
+      addLog(`Wave & Smile: distributed cubes across ${G.eventPickedBGs.length} battleground(s).`);
+      break;
+    }
+
+    case 'place_on_empty_self': {
+      // EXCOMM / Moscow: place on BGs where actor has no cubes
+      const n=Math.min(G.pendingCubes, G.playerCubes, cd.eventParam.maxCubes);
+      placeCubes(bgIdx,actorSide,n);
+      G.eventPickedBGs.push(bgIdx);
+      const maxT=cd.eventParam.maxTargets;
+      if(G.eventPickedBGs.length<maxT && G.playerCubes>0){
+        addLog(`Placed ${n} cube(s). Click another empty battleground, or Cancel.`);
+        render(); return;
+      }
+      addLog(`${cd.name}: placed cubes on ${G.eventPickedBGs.length} battleground(s).`);
+      break;
+    }
+
+    case 'place_and_move_toward': {
+      // U-2 Photographs: place 1 cube AND move BG toward player
+      const n=Math.min(1,G.playerCubes);
+      placeCubes(bgIdx,actorSide,n);
+      moveBGToward(bgIdx,actorZone);
+      addLog(`U-2 Photographs: placed ${n} cube(s) and moved battleground toward your sphere.`);
+      break;
+    }
+
+    case 'place_on_opponent_held': {
+      // Quarantine: place on opponent-held BGs
+      const n=Math.min(G.pendingCubes, G.playerCubes, cd.eventParam.maxCubes);
+      placeCubes(bgIdx,actorSide,n);
+      G.eventPickedBGs.push(bgIdx);
+      const maxT=cd.eventParam.maxTargets;
+      if(G.eventPickedBGs.length<maxT && G.playerCubes>0){
+        addLog(`Placed ${n} cube(s). Click another Soviet-held battleground, or Cancel.`);
+        render(); return;
+      }
+      addLog(`Quarantine: placed cubes on ${G.eventPickedBGs.length} Soviet-held battleground(s).`);
+      break;
+    }
+
+    case 'move_between_own_and_neutral': {
+      // Public Protests: move BGs between own zone and neutral
+      const prev=bg.zone;
+      if(bg.zone===actorZone) bg.zone='neutral';
+      else if(bg.zone==='neutral') bg.zone=actorZone;
+      G.eventPickedBGs.push(bgIdx);
+      if(G.eventPickedBGs.length<cd.eventParam.maxTargets){
+        addLog(`Moved ${cardData(bg.cardId)?.name} from ${prev} to ${bg.zone}. Pick one more, or Cancel.`);
+        render(); return;
+      }
+      addLog(`Public Protests: moved ${G.eventPickedBGs.length} battleground(s).`);
+      break;
+    }
+
+    case 'place_no_push_toward_self': {
+      // Strategic Balance: place cubes but BG does NOT move toward USSR (actor)
+      const n=Math.min(G.pendingCubes, G.playerCubes, cd.eventParam.maxCubes);
+      placeCubes(bgIdx,actorSide,n);
+      // No moveBGToward call — that's the whole point
+      G.eventPickedBGs.push(bgIdx);
+      if(G.eventPickedBGs.length<cd.eventParam.maxTargets && G.playerCubes>0){
+        addLog(`Placed ${n} cube(s) without pushing battleground. Pick another, or Cancel.`);
+        render(); return;
+      }
+      addLog(`Strategic Balance: placed cubes across ${G.eventPickedBGs.length} battleground(s), no push toward your sphere.`);
+      break;
+    }
+
+    case 'redistribute_own_cubes': {
+      // MRBMs & IRBMs / U Thant: step 0 = pick source BGs and remove cubes, step 1 = pick dest
+      if(G.eventStep===0){
+        // Remove cubes from source
+        const myC=actorSide==='US'?bg.cubesUS:bg.cubesUSSR;
+        const n=Math.min(G.pendingCubes, myC, cd.eventParam.maxCubes-G.eventCubesHeld);
+        if(actorSide==='US'){ bg.cubesUS-=n; G.playerCubes+=n; G.playerUsedCubes-=n; }
+        else { bg.cubesUSSR-=n; G.playerCubes+=n; G.playerUsedCubes-=n; }
+        G.eventCubesHeld+=n;
+        G.eventPickedBGs.push(bgIdx);
+        const maxF=cd.eventParam.maxFrom;
+        if(G.eventPickedBGs.length<maxF && G.eventCubesHeld<cd.eventParam.maxCubes){
+          addLog(`Picked up ${n} cube(s) (total ${G.eventCubesHeld}). Pick another source, or proceed to place.`);
+          render(); return;
+        }
+        // Move to step 1
+        G.eventStep=1;
+        G.eventPickedBGs=[];
+        G.pendingCubes=Math.min(G.eventCubesHeld,1);
+        addLog(`Picked up ${G.eventCubesHeld} cube(s) total. Now click a battleground to place them.`);
+        render();
+        render(); return;
+      } else {
+        // Place cubes on destination
+        const n=Math.min(G.pendingCubes, G.eventCubesHeld, G.playerCubes);
+        placeCubes(bgIdx,actorSide,n);
+        G.eventCubesHeld-=n;
+        if(G.eventCubesHeld>0){
+          G.pendingCubes=Math.min(G.eventCubesHeld,1);
+          addLog(`Placed ${n} cube(s). ${G.eventCubesHeld} still to place. Click another battleground.`);
+          render();
+          return;
+        }
+        addLog(`${cd.name}: redistribution complete.`);
+        break;
+      }
+    }
+
+    case 'move_bg_with_ussr_cubes': {
+      // U-2 Downed: move this BG to any zone — cycle through zones
+      // For simplicity: move to CPU zone if not already there, else neutral, else player
+      const zones=['cpu','neutral','player'];
+      const cur=zones.indexOf(bg.zone);
+      bg.zone=zones[(cur+1)%3];
+      addLog(`U-2 Downed: ${cardData(bg.cardId)?.name} moved to ${bg.zone} zone.`);
+      break;
+    }
+
+    case 'place_on_self_held': {
+      // Fidel Castro / Containment: place on BGs where actor already has cubes
+      const n=Math.min(G.pendingCubes, G.playerCubes, cd.eventParam.maxCubes);
+      placeCubes(bgIdx,actorSide,n);
+      G.eventPickedBGs.push(bgIdx);
+      const maxT=cd.eventParam.maxTargets||99;
+      const cubesUsed=G.eventPickedBGs.length;
+      if(cubesUsed<maxT && G.playerCubes>0){
+        addLog(`Placed ${n} cube(s). Click another own-held battleground, or Cancel.`);
+        render(); return;
+      }
+      addLog(`${cd.name}: reinforced ${G.eventPickedBGs.length} battleground(s).`);
+      break;
+    }
+
+    case 'swap_battleground': {
+      // To the Brink: move BG from one sphere to the other
+      if(bg.zone==='player') bg.zone='cpu';
+      else if(bg.zone==='cpu') bg.zone='player';
+      addLog(`To the Brink: ${cardData(bg.cardId)?.name} moved to ${bg.zone==='player'?'your':'opponent\'s'} sphere.`);
+      break;
+    }
+
+    default: {
+      const n=Math.min(G.pendingCubes, G.playerCubes,1);
+      placeCubes(bgIdx,actorSide,n);
+      addLog(`${cd.name}: event executed.`);
+    }
+  }
+
+  // Event complete — card already on board via placeCardInZone
+  endPlayerTurn();
+}
+
+function executeNoClickEvent(){
+  // Fallback for events that might not need a click (shouldn't be reached normally)
+  endPlayerTurn();
+}
+
+// =====================================================================
+// HELPERS
+// =====================================================================
+function commitPlayCard(handIdx, zone){
+  const cardId=G.playerHand[handIdx];
+  G.playerHand.splice(handIdx,1);
+  G.battlegrounds.push({cardId,zone,cubesUS:0,cubesUSSR:0,faceDown:false,isCuba:false});
+  if(G.deck.length>0) G.playerHand.push(G.deck.pop());
+}
+
+function placeCubes(bgIdx, side, n){
+  const bg=G.battlegrounds[bgIdx];
+  const actual=Math.max(0,n);
+  if(side==='US'){ bg.cubesUS+=actual; }
+  else { bg.cubesUSSR+=actual; }
+  // Charge the right player's pool
+  if(side===G.playerSide){ G.playerCubes-=actual; G.playerUsedCubes+=actual; }
+  else { G.cpuCubes-=actual; G.cpuUsedCubes+=actual; }
+}
+
+function moveBGToward(bgIdx, zone){
+  const bg=G.battlegrounds[bgIdx];
+  const opp=zone==='player'?'cpu':'player';
+  if(bg.zone===opp) bg.zone='neutral';
+  else if(bg.zone==='neutral') bg.zone=zone;
+  // already in zone: stays
+}
+
+function moveBGAway(bgIdx, zone){
+  const bg=G.battlegrounds[bgIdx];
+  const opp=zone==='player'?'cpu':'player';
+  if(bg.zone===zone) bg.zone='neutral';
+  else if(bg.zone==='neutral') bg.zone=opp;
+}
+
+// =====================================================================
+// END TURN / ROUND FLOW
+// =====================================================================
+function endPlayerTurn(){
+  G.selectedCardIdx=null; G.playMode=null; G.pendingCubes=1;
+  G.eventStep=0; G.eventCubesHeld=0; G.eventPickedBGs=[];
+  advanceTurn(true);
+}
+
+function advanceTurn(wasPlayer){
+  G.turnsThisRound++;
+
+  // Check game-ending condition: deck empty, both have ≤1 card, both have taken a turn
+  const gameEnding = G.deck.length===0 && G.playerHand.length<=1 && G.cpuHand.length<=1 && G.turnsThisRound>=2;
+  if(gameEnding){ setTimeout(doAftermath,600); return; }
+
+  if(G.turnsThisRound>=2){
+    // Round done — new initiative
+    G.round++;
+    G.turnsThisRound=0;
+    G.phase='initiative';
+    addLog(`Round ${G.round}. Bid for initiative.`);
+    render();
+    return;
+  }
+
+  // Switch to other player
+  G.currentTurn=G.currentTurn==='player'?'cpu':'player';
+  render();
+  if(G.currentTurn==='cpu') setTimeout(doCpuTurn,700);
+}
+
+// =====================================================================
+// CPU AI
+// =====================================================================
+function doCpuTurn(){
+  if(G.cpuHand.length===0){ advanceTurn(false); return; }
+
+  const cpuSide=G.cpuSide;
+  const cpuZone='cpu';
+
+  // Pick card: own-side cards first, then highest command value
+  let best=G.cpuHand[0], bestScore=-1;
+  G.cpuHand.forEach(cid=>{
+    const cd=cardData(cid);
+    let s=cd.commandMax+(cd.side===cpuSide?3:0);
+    if(s>bestScore){ bestScore=s; best=cid; }
+  });
+
+  const cardId=best;
+  const cd=cardData(cardId);
+  const handIdx=G.cpuHand.indexOf(cardId);
+
+  // Remove from CPU hand, play as battleground
+  G.cpuHand.splice(handIdx,1);
+  G.battlegrounds.push({cardId,zone:cpuZone,cubesUS:0,cubesUSSR:0,faceDown:false,isCuba:false});
+  if(G.deck.length>0) G.cpuHand.push(G.deck.pop());
+
+  // Decide: use event if own or UN card and it has a good effect, otherwise command
+  const canEvent=cd.side===cpuSide||cd.side==='UN';
+  let acted=false;
+
+  if(canEvent) acted=tryCpuEvent(cd, cpuSide, cpuZone);
+  if(!acted)   doCpuCommand(cd, cpuSide, cpuZone);
+}
+
+function doCpuCommand(cd, cpuSide, cpuZone){
+  const n=Math.min(cd.commandMax, G.cpuCubes);
+  if(n===0){ addLog(`CPU plays ${cd.name} as battleground (no cubes left).`); advanceTurn(false); return; }
+  const bgIdx=pickBestBGForCpu(cpuSide);
+  if(bgIdx===null){ addLog(`CPU plays ${cd.name} as battleground.`); advanceTurn(false); return; }
+  const bg=G.battlegrounds[bgIdx];
+  if(cpuSide==='US'){ bg.cubesUS+=n; } else { bg.cubesUSSR+=n; }
+  G.cpuCubes-=n; G.cpuUsedCubes+=n;
+  moveBGToward(bgIdx,cpuZone);
+  addLog(`CPU plays ${cd.name} (Command) — places ${n} cube(s) on ${cardData(bg.cardId)?.name}.`);
+  advanceTurn(false);
+}
+
+function tryCpuEvent(cd, cpuSide, cpuZone){
+  const oppZone=cpuZone==='cpu'?'player':'cpu';
+
+  switch(cd.eventType){
+    case 'place_on_empty_self': {
+      const empties=G.battlegrounds.filter(bg=>!bg.faceDown&&(cpuSide==='US'?bg.cubesUS:bg.cubesUSSR)===0);
+      if(!empties.length) return false;
+      const maxC=Math.min(cd.eventParam.maxCubes,G.cpuCubes);
+      const maxT=Math.min(cd.eventParam.maxTargets,empties.length);
+      let placed=0;
+      for(let i=0;i<maxT&&placed<maxC;i++){
+        const bg=empties[i];
+        const n=1;
+        if(cpuSide==='US') bg.cubesUS+=n; else bg.cubesUSSR+=n;
+        placed+=n;
+      }
+      G.cpuCubes-=placed; G.cpuUsedCubes+=placed;
+      addLog(`CPU uses ${cd.name} event: spread ${placed} cube(s) on uncontested battlegrounds.`);
+      advanceTurn(false); return true;
+    }
+    case 'place_on_self_held': {
+      const held=G.battlegrounds.filter(bg=>!bg.faceDown&&(cpuSide==='US'?bg.cubesUS:bg.cubesUSSR)>0);
+      if(!held.length) return false;
+      held.sort((a,b)=>cpuCubesOnBG(b)-cpuCubesOnBG(a));
+      const n=Math.min(cd.eventParam.maxCubes,G.cpuCubes);
+      if(n===0) return false;
+      const bg=held[0];
+      if(cpuSide==='US') bg.cubesUS+=n; else bg.cubesUSSR+=n;
+      G.cpuCubes-=n; G.cpuUsedCubes+=n;
+      addLog(`CPU uses ${cd.name} event: reinforced ${cardData(bg.cardId)?.name} with ${n} cube(s).`);
+      advanceTurn(false); return true;
+    }
+    case 'redistribute_own_cubes': {
+      // Consolidate: move cubes from weakest held to strongest contested
+      const withCubes=G.battlegrounds.filter(bg=>!bg.faceDown&&(cpuSide==='US'?bg.cubesUS:bg.cubesUSSR)>0);
+      if(withCubes.length<2) return false;
+      withCubes.sort((a,b)=>(cpuSide==='US'?a.cubesUS-b.cubesUS:a.cubesUSSR-b.cubesUSSR));
+      const from=withCubes[0], to=withCubes[withCubes.length-1];
+      const n=Math.min(cd.eventParam.maxCubes, cpuSide==='US'?from.cubesUS:from.cubesUSSR);
+      if(cpuSide==='US'){from.cubesUS-=n;to.cubesUS+=n;}else{from.cubesUSSR-=n;to.cubesUSSR+=n;}
+      addLog(`CPU uses ${cd.name} event: repositioned ${n} cube(s) to ${cardData(to.cardId)?.name}.`);
+      advanceTurn(false); return true;
+    }
+    case 'move_bg_with_ussr_cubes': {
+      const targets=G.battlegrounds.filter(bg=>!bg.faceDown&&bg.cubesUSSR>0&&bg.zone!==cpuZone);
+      if(!targets.length) return false;
+      targets.sort((a,b)=>b.cubesUSSR-a.cubesUSSR);
+      targets[0].zone=cpuZone;
+      addLog(`CPU uses ${cd.name} event: claimed ${cardData(targets[0].cardId)?.name} for ${cpuSide} sphere.`);
+      advanceTurn(false); return true;
+    }
+    case 'swap_battleground': {
+      const inOpp=G.battlegrounds.filter(bg=>!bg.faceDown&&bg.zone===oppZone);
+      if(!inOpp.length) return false;
+      inOpp.sort((a,b)=>playerCubesOnBG(b)-playerCubesOnBG(a));
+      inOpp[0].zone=cpuZone;
+      addLog(`CPU uses To the Brink: seized ${cardData(inOpp[0].cardId)?.name} from your sphere!`);
+      advanceTurn(false); return true;
+    }
+    case 'place_on_opponent_held': {
+      // CPU using US quarantine card on player-held BGs
+      const oppHeld=G.battlegrounds.filter(bg=>!bg.faceDown&&playerCubesOnBG(bg)>0);
+      if(!oppHeld.length) return false;
+      const n=Math.min(cd.eventParam.maxCubes,G.cpuCubes);
+      if(n===0) return false;
+      const bg=oppHeld[0];
+      if(cpuSide==='US') bg.cubesUS+=n; else bg.cubesUSSR+=n;
+      G.cpuCubes-=n; G.cpuUsedCubes+=n;
+      addLog(`CPU uses ${cd.name} event: placed ${n} cube(s) on your territory.`);
+      advanceTurn(false); return true;
+    }
+    default: return false;
+  }
+}
+
+function pickBestBGForCpu(cpuSide){
+  let best=null, bestScore=-999;
+  G.battlegrounds.forEach((bg,i)=>{
+    if(bg.faceDown) return;
+    const mine=cpuSide==='US'?bg.cubesUS:bg.cubesUSSR;
+    const theirs=cpuSide==='US'?bg.cubesUSSR:bg.cubesUS;
+    // Score: contested > behind > winning
+    let s=0;
+    if(mine===theirs) s=5;
+    else if(mine<theirs) s=3+(theirs-mine);
+    else s=1;
+    if(bg.zone==='player') s+=3; // prioritise recovering opponent's zone
+    if(s>bestScore){bestScore=s;best=i;}
+  });
+  return best;
+}
+
+// =====================================================================
+// AFTERMATH & END GAME
+// =====================================================================
+function doAftermath(){
+  G.phase='aftermath';
+  addLog('The crisis reaches its conclusion…');
+
+  // Flip Cuba
+  const cuba=G.battlegrounds.find(b=>b.isCuba);
+  if(cuba) cuba.faceDown=false;
+
+  // Place leftover hand cards into respective spheres for DEFCON check
+  if(G.playerHand[0]){
+    G.battlegrounds.push({cardId:G.playerHand[0],zone:'player',cubesUS:0,cubesUSSR:0,faceDown:false,isCuba:false});
+  }
+  if(G.cpuHand[0]){
+    G.battlegrounds.push({cardId:G.cpuHand[0],zone:'cpu',cubesUS:0,cubesUSSR:0,faceDown:false,isCuba:false});
+  }
+
+  // Aftermath prestige: player with more total cubes remaining scores +1
+  render();
+  setTimeout(doEndGame,800);
+}
+
+function doEndGame(){
+  G.phase='end';
+
+  // Nuclear war check
+  const pDef=countDefconInZone('player');
+  const cDef=countDefconInZone('cpu');
+  const pNuke=pDef.orange>=3||pDef.green>=3||pDef.purple>=3;
+  const cNuke=cDef.orange>=3||cDef.green>=3||cDef.purple>=3;
+
+  const scores=calcPrestige();
+
+  // Aftermath prestige
+  if(G.playerCubes>G.cpuCubes) scores.player+=1;
+  else if(G.cpuCubes>G.playerCubes) scores.cpu+=1;
+
+  let outcome,cls,detail;
+  if(pNuke&&cNuke){
+    outcome='MUTUAL ANNIHILATION';cls='nuke';
+    detail='Both superpowers triggered nuclear war. The world lies in ruins.';
+  } else if(pNuke){
+    outcome='NUCLEAR WAR — DEFEAT';cls='nuke';
+    detail=`3+ DEFCON symbols of one colour accumulated in your sphere. You triggered nuclear war and lose.`;
+  } else if(cNuke){
+    outcome='NUCLEAR WAR — VICTORY';cls='win';
+    detail='The CPU\'s miscalculation triggered nuclear war. You win — though the world barely survived.';
+  } else if(scores.player>scores.cpu){
+    outcome='VICTORY';cls='win';
+    detail=`You emerge the dominant superpower with ${scores.player} Prestige to the CPU's ${scores.cpu}.`;
+  } else if(scores.cpu>scores.player){
+    outcome='DEFEAT';cls='lose';
+    detail=`The CPU outmaneuvered you — ${scores.cpu} to your ${scores.player} Prestige.`;
+  } else {
+    outcome='STALEMATE';cls='draw';
+    detail=`An uneasy equilibrium. Both superpowers end with ${scores.player} Prestige.`;
+  }
+
+  // Score table
+  const tbody=document.getElementById('score-table-body');
+  tbody.innerHTML='';
+  G.battlegrounds.forEach(bg=>{
+    const cd=cardData(bg.cardId); if(!cd) return;
+    const pc=playerCubesOnBG(bg), cc=cpuCubesOnBG(bg);
+    const pts=bg.isCuba?2:1;
+    let dom='Neutral';
+    if(pc>cc) dom=G.playerSide;
+    else if(cc>pc) dom=G.cpuSide;
+    else dom=bg.zone==='player'?G.playerSide:bg.zone==='cpu'?G.cpuSide:'Tied';
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${cd.name}${bg.isCuba?' ★':''}</td><td>${dom}</td><td>${dom===G.playerSide||dom===G.cpuSide?pts:0}</td>`;
+    tbody.appendChild(tr);
+  });
+
+  document.getElementById('result-title-text').textContent=outcome;
+  document.getElementById('result-title-text').className='result-title '+cls;
+  document.getElementById('result-detail-text').textContent=detail;
+  document.getElementById('results-modal').classList.add('open');
+  addLog('GAME OVER: '+outcome);
+  render();
+}
+
+// =====================================================================
+// LOG
+// =====================================================================
+function addLog(msg){
+  const el=document.getElementById('game-log');
+  const s=document.createElement('span');
+  s.textContent=msg+' — ';
+  el.appendChild(s);
+  el.scrollTop=el.scrollHeight;
+}
+
+// =====================================================================
+// NAVIGATION
+// =====================================================================
+function startGame(side){
+  document.getElementById('intro-screen').classList.remove('active');
+  document.getElementById('game-screen').classList.add('active');
+  document.getElementById('game-log').innerHTML='';
+  initGame(side);
+  render();
+}
+
+function showIntro(){
+  document.getElementById('results-modal').classList.remove('open');
+  document.getElementById('game-screen').classList.remove('active');
+  document.getElementById('intro-screen').classList.add('active');
+}
+
+function confirmNewGame(){
+  if(confirm('Start a new game?')){ document.getElementById('results-modal').classList.remove('open'); startGame(G.playerSide||'US'); }
+}
+
+function openRules() { document.getElementById('rules-modal').classList.add('open'); }
+function closeRules(){ document.getElementById('rules-modal').classList.remove('open'); }
+</script>
+</body>
+</html>
