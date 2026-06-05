@@ -2015,8 +2015,11 @@ function cancelPlay(){
 
 function adjustCubes(delta){
   if(G.selectedCardIdx===null) return;
-  const cd=cardData(G.playerHand[G.selectedCardIdx]);
-  const maxC = G.playMode==='command' ? cd.commandMax : (cd.eventParam.maxCubes||1);
+  const cd = (G.playMode==='event' && G.placedBGIdx!==null)
+    ? cardData(G.battlegrounds[G.placedBGIdx]?.cardId)
+    : cardData(G.playerHand[G.selectedCardIdx]);
+  if(!cd) return;
+  const maxC = G.playMode==='command' ? cd.commandMax : (cd.eventParam?.maxCubes||1);
   G.pendingCubes=Math.max(1,Math.min(maxC,Math.min(G.playerCubes,G.pendingCubes+delta)));
   document.getElementById('cube-count-display').textContent=G.pendingCubes;
 }
