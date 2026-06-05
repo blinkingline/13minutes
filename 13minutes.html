@@ -1874,7 +1874,8 @@ function renderActionPanel() {
     const needsCubeCount=['spread_cubes','place_on_empty_self','place_on_opponent_held','place_no_push_toward_self','place_on_self_held','place_and_move_toward','redistribute_own_cubes'].includes(cd.eventType);
     placUI.style.display=needsCubeCount?'block':'none';
     if(needsCubeCount){
-      document.getElementById('placement-label').textContent=`Cubes for this target (max ${Math.min(cd.eventParam.maxCubes||1,G.playerCubes)})`;
+      const budgetLeft=Math.min((cd.eventParam.maxCubes||1)-G.eventCubesHeld, G.playerCubes);
+      document.getElementById('placement-label').textContent=`Cubes for this target (${budgetLeft} remaining)`;
       document.getElementById('cube-count-display').textContent=G.pendingCubes;
     }
     return;
@@ -2195,31 +2196,36 @@ function doPlayerEvent(bgIdx){
   switch(cd.eventType){
 
     case 'spread_cubes': {
-      // Wave & Smile: up to 2 cubes on up to 2 BGs
-      const n=Math.min(G.pendingCubes, G.playerCubes, cd.eventParam.maxCubes);
+      const budget=cd.eventParam.maxCubes-G.eventCubesHeld;
+      const n=Math.min(G.pendingCubes, G.playerCubes, budget);
       placeCubes(bgIdx,actorSide,n);
+      G.eventCubesHeld+=n;
       G.eventPickedBGs.push(bgIdx);
-      const remaining=cd.eventParam.maxTargets-G.eventPickedBGs.length;
-      if(remaining>0 && G.playerCubes>0){
-        addLog(`Placed ${n} cube(s). You may click ${remaining} more battleground(s), or Cancel to end.`);
-        // Stay in event mode so they can pick another BG
+      const targetsLeft=cd.eventParam.maxTargets-G.eventPickedBGs.length;
+      const budgetLeft=cd.eventParam.maxCubes-G.eventCubesHeld;
+      if(targetsLeft>0 && G.playerCubes>0 && budgetLeft>0){
+        G.pendingCubes=Math.min(budgetLeft,G.playerCubes);
+        addLog(`Placed ${n} cube(s) (${budgetLeft} remaining). Click ${targetsLeft} more battleground(s), or Cancel.`);
         render(); return;
       }
-      addLog(`Wave & Smile: distributed cubes across ${G.eventPickedBGs.length} battleground(s).`);
+      addLog(`${cd.name}: distributed ${G.eventCubesHeld} cube(s) across ${G.eventPickedBGs.length} battleground(s).`);
       break;
     }
 
     case 'place_on_empty_self': {
-      // EXCOMM / Moscow: place on BGs where actor has no cubes
-      const n=Math.min(G.pendingCubes, G.playerCubes, cd.eventParam.maxCubes);
+      const budget=cd.eventParam.maxCubes-G.eventCubesHeld;
+      const n=Math.min(G.pendingCubes, G.playerCubes, budget);
       placeCubes(bgIdx,actorSide,n);
+      G.eventCubesHeld+=n;
       G.eventPickedBGs.push(bgIdx);
       const maxT=cd.eventParam.maxTargets;
-      if(G.eventPickedBGs.length<maxT && G.playerCubes>0){
-        addLog(`Placed ${n} cube(s). Click another empty battleground, or Cancel.`);
+      const budgetLeft=cd.eventParam.maxCubes-G.eventCubesHeld;
+      if(G.eventPickedBGs.length<maxT && G.playerCubes>0 && budgetLeft>0){
+        G.pendingCubes=Math.min(budgetLeft,G.playerCubes);
+        addLog(`Placed ${n} cube(s) (${budgetLeft} remaining). Click another empty battleground, or Cancel.`);
         render(); return;
       }
-      addLog(`${cd.name}: placed cubes on ${G.eventPickedBGs.length} battleground(s).`);
+      addLog(`${cd.name}: placed ${G.eventCubesHeld} cube(s) on ${G.eventPickedBGs.length} battleground(s).`);
       break;
     }
 
@@ -2233,16 +2239,19 @@ function doPlayerEvent(bgIdx){
     }
 
     case 'place_on_opponent_held': {
-      // Quarantine: place on opponent-held BGs
-      const n=Math.min(G.pendingCubes, G.playerCubes, cd.eventParam.maxCubes);
+      const budget=cd.eventParam.maxCubes-G.eventCubesHeld;
+      const n=Math.min(G.pendingCubes, G.playerCubes, budget);
       placeCubes(bgIdx,actorSide,n);
+      G.eventCubesHeld+=n;
       G.eventPickedBGs.push(bgIdx);
       const maxT=cd.eventParam.maxTargets;
-      if(G.eventPickedBGs.length<maxT && G.playerCubes>0){
-        addLog(`Placed ${n} cube(s). Click another Soviet-held battleground, or Cancel.`);
+      const budgetLeft=cd.eventParam.maxCubes-G.eventCubesHeld;
+      if(G.eventPickedBGs.length<maxT && G.playerCubes>0 && budgetLeft>0){
+        G.pendingCubes=Math.min(budgetLeft,G.playerCubes);
+        addLog(`Placed ${n} cube(s) (${budgetLeft} remaining). Click another opponent-held battleground, or Cancel.`);
         render(); return;
       }
-      addLog(`Quarantine: placed cubes on ${G.eventPickedBGs.length} Soviet-held battleground(s).`);
+      addLog(`${cd.name}: placed ${G.eventCubesHeld} cube(s) on ${G.eventPickedBGs.length} battleground(s).`);
       break;
     }
 
@@ -2261,16 +2270,19 @@ function doPlayerEvent(bgIdx){
     }
 
     case 'place_no_push_toward_self': {
-      // Strategic Balance: place cubes but BG does NOT move toward USSR (actor)
-      const n=Math.min(G.pendingCubes, G.playerCubes, cd.eventParam.maxCubes);
+      const budget=cd.eventParam.maxCubes-G.eventCubesHeld;
+      const n=Math.min(G.pendingCubes, G.playerCubes, budget);
       placeCubes(bgIdx,actorSide,n);
+      G.eventCubesHeld+=n;
       // No moveBGToward call — that's the whole point
       G.eventPickedBGs.push(bgIdx);
-      if(G.eventPickedBGs.length<cd.eventParam.maxTargets && G.playerCubes>0){
-        addLog(`Placed ${n} cube(s) without pushing battleground. Pick another, or Cancel.`);
+      const budgetLeft=cd.eventParam.maxCubes-G.eventCubesHeld;
+      if(G.eventPickedBGs.length<cd.eventParam.maxTargets && G.playerCubes>0 && budgetLeft>0){
+        G.pendingCubes=Math.min(budgetLeft,G.playerCubes);
+        addLog(`Placed ${n} cube(s) (${budgetLeft} remaining). Pick another, or Cancel.`);
         render(); return;
       }
-      addLog(`Strategic Balance: placed cubes across ${G.eventPickedBGs.length} battleground(s), no push toward your sphere.`);
+      addLog(`${cd.name}: placed ${G.eventCubesHeld} cube(s) across ${G.eventPickedBGs.length} battleground(s).`);
       break;
     }
 
@@ -2323,17 +2335,19 @@ function doPlayerEvent(bgIdx){
     }
 
     case 'place_on_self_held': {
-      // Fidel Castro / Containment: place on BGs where actor already has cubes
-      const n=Math.min(G.pendingCubes, G.playerCubes, cd.eventParam.maxCubes);
+      const budget=cd.eventParam.maxCubes-G.eventCubesHeld;
+      const n=Math.min(G.pendingCubes, G.playerCubes, budget);
       placeCubes(bgIdx,actorSide,n);
+      G.eventCubesHeld+=n;
       G.eventPickedBGs.push(bgIdx);
       const maxT=cd.eventParam.maxTargets||99;
-      const cubesUsed=G.eventPickedBGs.length;
-      if(cubesUsed<maxT && G.playerCubes>0){
-        addLog(`Placed ${n} cube(s). Click another own-held battleground, or Cancel.`);
+      const budgetLeft=cd.eventParam.maxCubes-G.eventCubesHeld;
+      if(G.eventPickedBGs.length<maxT && G.playerCubes>0 && budgetLeft>0){
+        G.pendingCubes=Math.min(budgetLeft,G.playerCubes);
+        addLog(`Placed ${n} cube(s) (${budgetLeft} remaining). Click another own-held battleground, or Cancel.`);
         render(); return;
       }
-      addLog(`${cd.name}: reinforced ${G.eventPickedBGs.length} battleground(s).`);
+      addLog(`${cd.name}: placed ${G.eventCubesHeld} cube(s) on ${G.eventPickedBGs.length} battleground(s).`);
       break;
     }
 
