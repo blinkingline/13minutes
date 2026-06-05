@@ -2015,7 +2015,7 @@ function cancelPlay(){
 
 function adjustCubes(delta){
   if(G.selectedCardIdx===null) return;
-  const cd = (G.playMode==='event' && G.placedBGIdx!==null)
+  const cd = (G.cardPlaced && G.placedBGIdx!==null)
     ? cardData(G.battlegrounds[G.placedBGIdx]?.cardId)
     : cardData(G.playerHand[G.selectedCardIdx]);
   if(!cd) return;
