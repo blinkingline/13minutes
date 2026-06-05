@@ -1561,6 +1561,9 @@ function initGame(playerSide) {
     eventTargetsLeft: 0, // targets remaining
     eventCubesHeld: 0,   // cubes picked up (redistribute step)
     eventPickedBGs: [],  // BG indices already used this event
+    // Opponent-event-react state (rule: if you play opponent's card, they may use its Event first)
+    opponentReactPending: false,
+    pendingCpuCommand: null,    // { n, bgIdx, cpuSide, cpuZone } stored while player reacts
   };
 
   // Build deck (all 13 cards)
@@ -1791,6 +1794,16 @@ function renderActionPanel() {
     return;
   }
 
+  // Reaction prompt: CPU played a player-side card for Command; player may use its Event first
+  if(G.opponentReactPending){
+    const rcd=cardData(G.battlegrounds[G.placedBGIdx]?.cardId);
+    desc.textContent=`CPU is playing "${rcd?.name}" for Command. You may use its Event first.`;
+    btnCmd.textContent='SKIP — Let CPU Command'; btnCmd.disabled=false; btnCmd.onclick=reactSkip;
+    btnEvt.textContent=`USE EVENT — ${rcd?.name}`; btnEvt.disabled=false; btnEvt.onclick=reactUseEvent;
+    btnCnl.style.display='none'; placUI.style.display='none';
+    return;
+  }
+
   if(G.selectedCardIdx===null){
     desc.textContent='Select a card from your hand to play it as a new battleground.';
     btnCmd.disabled=true; btnEvt.disabled=true; btnCnl.style.display='none'; placUI.style.display='none';
@@ -1965,6 +1978,11 @@ function startCommand(){
   if(G.selectedCardIdx===null||!G.cardPlaced) return;
   const cd=cardData(G.battlegrounds[G.placedBGIdx]?.cardId);
   if(!cd) return;
+  // Rule: if player plays opponent's card, CPU may use its Event before player's Command
+  if(cd.side===G.cpuSide){
+    const fired=executeCpuEventOnly(cd, G.cpuSide, 'cpu');
+    if(fired) addLog(`CPU reacts: uses ${cd.name} event before your Command.`);
+  }
   G.playMode='command';
   G.pendingCubes=Math.min(cd.commandMax, G.playerCubes);
   render();
@@ -1997,6 +2015,35 @@ function placeCardInZone(zone){
   render();
 }
 
+function reactSkip(){
+  const cmd=G.pendingCpuCommand;
+  G.pendingCpuCommand=null; G.opponentReactPending=false;
+  G.cardPlaced=false; G.placedBGIdx=null; G.currentTurn='cpu';
+  completePendingCpuCommand(cmd);
+}
+
+function reactUseEvent(){
+  G.opponentReactPending=false;
+  G.selectedCardIdx=0; // sentinel so isBGSelectable / startEvent guards pass
+  const cardId=G.battlegrounds[G.placedBGIdx]?.cardId;
+  const cd=cardData(cardId);
+  if(!cd){ reactSkip(); return; }
+  G.playMode='event';
+  G.eventStep=0; G.eventCubesHeld=0; G.eventCubesLeft=0; G.eventPickedBGs=[];
+  G.pendingCubes=Math.min(cd.eventParam?.maxCubes||1, G.playerCubes);
+  addLog(`You react: EVENT — ${cd.name} — ${cd.eventDesc}`);
+  render();
+}
+
+function completePendingCpuCommand(cmd){
+  const bg=G.battlegrounds[cmd.bgIdx];
+  if(cmd.cpuSide==='US') bg.cubesUS+=cmd.n; else bg.cubesUSSR+=cmd.n;
+  G.cpuCubes-=cmd.n; G.cpuUsedCubes+=cmd.n;
+  moveBGToward(cmd.bgIdx, cmd.cpuZone);
+  addLog(`CPU Command: placed ${cmd.n} cube(s) on ${cardData(bg.cardId)?.name}.`);
+  advanceTurn(false);
+}
+
 function cancelPlay(){
   // If card was already placed on board, remove it and return to hand
   if(G.cardPlaced && G.placedBGIdx!==null){
@@ -2007,6 +2054,16 @@ function cancelPlay(){
     if(G.deck.length>=0 && G.playerHand.length>2){
       G.deck.push(G.playerHand.pop());
     }
+  }
+  // If we were in a reaction event, treat cancel as skip (don't clear CPU's card)
+  if(G.pendingCpuCommand){
+    const cmd=G.pendingCpuCommand;
+    G.pendingCpuCommand=null; G.opponentReactPending=false;
+    G.selectedCardIdx=null; G.playMode=null; G.cardPlaced=false; G.placedBGIdx=null;
+    G.pendingCubes=1; G.eventStep=0; G.eventCubesHeld=0; G.eventPickedBGs=[];
+    G.currentTurn='cpu';
+    completePendingCpuCommand(cmd);
+    return;
   }
   G.selectedCardIdx=null; G.playMode=null; G.cardPlaced=false; G.placedBGIdx=null;
   G.pendingCubes=1; G.eventStep=0; G.eventCubesHeld=0; G.eventPickedBGs=[];
@@ -2330,8 +2387,17 @@ function moveBGAway(bgIdx, zone){
 // END TURN / ROUND FLOW
 // =====================================================================
 function endPlayerTurn(){
+  const cmd=G.pendingCpuCommand;
   G.selectedCardIdx=null; G.playMode=null; G.pendingCubes=1;
   G.eventStep=0; G.eventCubesHeld=0; G.eventPickedBGs=[];
+  G.cardPlaced=false; G.placedBGIdx=null;
+  G.pendingCpuCommand=null; G.opponentReactPending=false;
+  if(cmd){
+    // Player reacted to CPU's card play; now execute the pending CPU command
+    G.currentTurn='cpu';
+    completePendingCpuCommand(cmd);
+    return;
+  }
   advanceTurn(true);
 }
 
@@ -2397,6 +2463,18 @@ function doCpuCommand(cd, cpuSide, cpuZone){
   if(n===0){ addLog(`CPU plays ${cd.name} as battleground (no cubes left).`); advanceTurn(false); return; }
   const bgIdx=pickBestBGForCpu(cpuSide);
   if(bgIdx===null){ addLog(`CPU plays ${cd.name} as battleground.`); advanceTurn(false); return; }
+  // Rule: if CPU plays player's card for Command, player may use its Event first
+  if(cd.side===G.playerSide && canUseEvent(cd.id, G.playerSide)){
+    const cpuBGIdx=G.battlegrounds.length-1; // the card CPU just placed
+    G.pendingCpuCommand={n, bgIdx, cpuSide, cpuZone};
+    G.opponentReactPending=true;
+    G.placedBGIdx=cpuBGIdx;
+    G.cardPlaced=true;
+    G.currentTurn='player';
+    addLog(`CPU plays ${cd.name} (Command) — you may use the Event first!`);
+    render();
+    return;
+  }
   const bg=G.battlegrounds[bgIdx];
   if(cpuSide==='US'){ bg.cubesUS+=n; } else { bg.cubesUSSR+=n; }
   G.cpuCubes-=n; G.cpuUsedCubes+=n;
@@ -2475,6 +2553,72 @@ function tryCpuEvent(cd, cpuSide, cpuZone){
       G.cpuCubes-=n; G.cpuUsedCubes+=n;
       addLog(`CPU uses ${cd.name} event: placed ${n} cube(s) on your territory.`);
       advanceTurn(false); return true;
+    }
+    default: return false;
+  }
+}
+
+// Like tryCpuEvent but does NOT call advanceTurn — used for opponent-event reactions
+function executeCpuEventOnly(cd, cpuSide, cpuZone){
+  const oppZone=cpuZone==='cpu'?'player':'cpu';
+  switch(cd.eventType){
+    case 'place_on_empty_self': {
+      const empties=G.battlegrounds.filter(bg=>!bg.faceDown&&(cpuSide==='US'?bg.cubesUS:bg.cubesUSSR)===0);
+      if(!empties.length) return false;
+      const maxC=Math.min(cd.eventParam.maxCubes,G.cpuCubes);
+      const maxT=Math.min(cd.eventParam.maxTargets,empties.length);
+      let placed=0;
+      for(let i=0;i<maxT&&placed<maxC;i++){
+        const bg=empties[i];
+        if(cpuSide==='US') bg.cubesUS+=1; else bg.cubesUSSR+=1;
+        placed++;
+      }
+      G.cpuCubes-=placed; G.cpuUsedCubes+=placed;
+      return placed>0;
+    }
+    case 'place_on_self_held': {
+      const held=G.battlegrounds.filter(bg=>!bg.faceDown&&(cpuSide==='US'?bg.cubesUS:bg.cubesUSSR)>0);
+      if(!held.length) return false;
+      held.sort((a,b)=>cpuCubesOnBG(b)-cpuCubesOnBG(a));
+      const n=Math.min(cd.eventParam.maxCubes,G.cpuCubes);
+      if(n===0) return false;
+      const bg=held[0];
+      if(cpuSide==='US') bg.cubesUS+=n; else bg.cubesUSSR+=n;
+      G.cpuCubes-=n; G.cpuUsedCubes+=n;
+      return true;
+    }
+    case 'redistribute_own_cubes': {
+      const withCubes=G.battlegrounds.filter(bg=>!bg.faceDown&&(cpuSide==='US'?bg.cubesUS:bg.cubesUSSR)>0);
+      if(withCubes.length<2) return false;
+      withCubes.sort((a,b)=>(cpuSide==='US'?a.cubesUS-b.cubesUS:a.cubesUSSR-b.cubesUSSR));
+      const from=withCubes[0], to=withCubes[withCubes.length-1];
+      const n=Math.min(cd.eventParam.maxCubes, cpuSide==='US'?from.cubesUS:from.cubesUSSR);
+      if(cpuSide==='US'){from.cubesUS-=n;to.cubesUS+=n;}else{from.cubesUSSR-=n;to.cubesUSSR+=n;}
+      return true;
+    }
+    case 'move_bg_with_ussr_cubes': {
+      const targets=G.battlegrounds.filter(bg=>!bg.faceDown&&bg.cubesUSSR>0&&bg.zone!==cpuZone);
+      if(!targets.length) return false;
+      targets.sort((a,b)=>b.cubesUSSR-a.cubesUSSR);
+      targets[0].zone=cpuZone;
+      return true;
+    }
+    case 'swap_battleground': {
+      const inOpp=G.battlegrounds.filter(bg=>!bg.faceDown&&bg.zone===oppZone);
+      if(!inOpp.length) return false;
+      inOpp.sort((a,b)=>playerCubesOnBG(b)-playerCubesOnBG(a));
+      inOpp[0].zone=cpuZone;
+      return true;
+    }
+    case 'place_on_opponent_held': {
+      const oppHeld=G.battlegrounds.filter(bg=>!bg.faceDown&&playerCubesOnBG(bg)>0);
+      if(!oppHeld.length) return false;
+      const n=Math.min(cd.eventParam.maxCubes,G.cpuCubes);
+      if(n===0) return false;
+      const bg=oppHeld[0];
+      if(cpuSide==='US') bg.cubesUS+=n; else bg.cubesUSSR+=n;
+      G.cpuCubes-=n; G.cpuUsedCubes+=n;
+      return true;
     }
     default: return false;
   }
