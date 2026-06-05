@@ -1966,7 +1966,7 @@ function startCommand(){
   const cd=cardData(G.battlegrounds[G.placedBGIdx]?.cardId);
   if(!cd) return;
   G.playMode='command';
-  G.pendingCubes=Math.min(1,Math.min(cd.commandMax, G.playerCubes));
+  G.pendingCubes=Math.min(cd.commandMax, G.playerCubes);
   render();
 }
 
@@ -1978,7 +1978,7 @@ function startEvent(){
   if(!canUseEvent(cardId, G.playerSide)) return;
   G.playMode='event';
   G.eventStep=0; G.eventCubesHeld=0; G.eventCubesLeft=0; G.eventPickedBGs=[];
-  G.pendingCubes=Math.min(1, Math.min(cd.eventParam?.maxCubes||1, G.playerCubes));
+  G.pendingCubes=Math.min(cd.eventParam?.maxCubes||1, G.playerCubes);
   addLog(`EVENT: ${cd.name} — ${cd.eventDesc}`);
   render();
 }
